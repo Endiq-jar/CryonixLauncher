@@ -18,7 +18,7 @@ import git.mojo.sdl.SDLInputConnection;
 public class SDLBackend implements PlatformBackend{
     public SDLBackend(){
         SDLActivity.addGrabListener(isGrabbing -> {
-            Tools.runOnUiThread(() -> Platform.executeGrabbingListeners(isGrabbing));
+            Tools.runOnUiThread(() -> Platform.grabStateChanged(isGrabbing));
         });
     }
     public static void initialize(Activity activity) {

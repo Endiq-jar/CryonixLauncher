@@ -44,10 +44,6 @@ public class Platform {
     public static PlatformBackend PLATFORM = new DummyBackend(); // Initialize a dummy platform - the game will initialize correct one later
     private static List<PlatformGrabListener> grabListeners = new ArrayList<>();
     private static PlatformCursorImplementor mCursorImplementor = null;
-    static {
-        grabListeners.add(grabbing -> isGrabbing = grabbing);
-        grabListeners.add(grabbing -> { if(mCursorImplementor != null) mCursorImplementor.onGrabState(grabbing); });
-    }
     private static boolean isGrabbing = false;
     public static double cursorX;
     public static double cursorY;
@@ -67,7 +63,9 @@ public class Platform {
         mPendingSurface = surface;
     }
 
-    public static void executeGrabbingListeners(boolean grabbing){
+    public static void grabStateChanged(boolean grabbing) {
+        isGrabbing = grabbing;
+        if(mCursorImplementor != null) mCursorImplementor.onGrabState(grabbing);
         for(PlatformGrabListener listener : grabListeners){
             listener.onGrabState(grabbing);
         }
