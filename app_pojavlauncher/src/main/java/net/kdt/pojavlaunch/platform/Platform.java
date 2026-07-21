@@ -25,22 +25,6 @@ import git.mojo.sdl.SDLActivity;
 import git.mojo.sdl.SDLControllerManager;
 
 public class Platform {
-    private static AndroidClipboard mClipboard;
-    public static void initialize(Activity activity){
-        mClipboard = new AndroidClipboard(activity.getApplicationContext());
-        GLFW.setInitCallback(() -> onInit(new GLFWBackend()));
-        SDLActivity.setInitCallback(() -> onInit(new SDLBackend()));
-        SDLActivity.setClipboard(mClipboard);
-        GLFW.setClipboardImpl(mClipboard);
-        // SDL can handle gamepads on its own, so route all events through it
-        // if SDL was detected of course (the check is based on detectDevices)
-        // Vanilla SDL client shouldn't touch input system and thus cause emulated input to break
-        SDLControllerManager.setEnabledCallback(() -> mPlatformGamepad = new SDLGamepad());
-        SDLBackend.initialize(activity);
-
-
-    }
-
     public static PlatformBackend PLATFORM = new DummyBackend(); // Initialize a dummy platform - the game will initialize correct one later
     private static List<PlatformGrabListener> grabListeners = new ArrayList<>();
     private static PlatformCursorImplementor mCursorImplementor = null;
@@ -51,22 +35,38 @@ public class Platform {
     private static PlatformGamepad mPlatformGamepad = null;
     private static PlatformCursor mPlatformCursor = null;
     private static GamepadEnableHandler mGamepadEnabler;
+    private static AndroidClipboard mClipboard;
 
-    private static void onInit(PlatformBackend impl){
+    public static void initialize(Activity activity) {
+        mClipboard = new AndroidClipboard(activity.getApplicationContext());
+        GLFW.setInitCallback(() -> onInit(new GLFWBackend()));
+        SDLActivity.setInitCallback(() -> onInit(new SDLBackend()));
+        SDLActivity.setClipboard(mClipboard);
+        GLFW.setClipboardImpl(mClipboard);
+        // SDL can handle gamepads on its own, so route all events through it
+        // if SDL was detected of course (the check is based on detectDevices)
+        // Vanilla SDL client shouldn't touch input system and thus cause emulated input to break
+        SDLControllerManager.setEnabledCallback(() -> mPlatformGamepad = new SDLGamepad());
+        SDLBackend.initialize(activity);
+    }
+
+    private static void onInit(PlatformBackend impl) {
         Platform.setPlatformLibrary(impl);
         ContextExecutor.executeActivity(activity -> ((MainActivity) activity).hideLoadingScreen());
     }
-    public static boolean isGrabbing(){
+
+    public static boolean isGrabbing() {
         return isGrabbing;
     }
-    public static void setPendingSurface(Surface surface){
+
+    public static void setPendingSurface(Surface surface) {
         mPendingSurface = surface;
     }
 
     public static void grabStateChanged(boolean grabbing) {
         isGrabbing = grabbing;
         if(mCursorImplementor != null) mCursorImplementor.onGrabState(grabbing);
-        for(PlatformGrabListener listener : grabListeners){
+        for(PlatformGrabListener listener : grabListeners) {
             listener.onGrabState(grabbing);
         }
     }
@@ -74,28 +74,33 @@ public class Platform {
     public static PlatformGamepad getPlatformGamepad() {
         return mPlatformGamepad;
     }
-    public static PlatformCursor getCursor(){
+
+    public static PlatformCursor getCursor() {
         return mPlatformCursor;
     }
-    public static void setCursorImplementor(PlatformCursorImplementor implementor){
+
+    public static void setCursorImplementor(PlatformCursorImplementor implementor) {
         mCursorImplementor = implementor;
     }
-    public static PlatformCursorImplementor getCursorImplementor(){
+
+    public static PlatformCursorImplementor getCursorImplementor() {
         return mCursorImplementor;
     }
 
     // To be picked by GLFW
-    public static void setGamepadEnableHandler(GamepadEnableHandler handler){
+    public static void setGamepadEnableHandler(GamepadEnableHandler handler) {
         mGamepadEnabler = handler;
     }
-    public static GamepadEnableHandler getGamepadEnableHandler(){
+
+    public static GamepadEnableHandler getGamepadEnableHandler() {
         return mGamepadEnabler;
     }
-    public static void addGrabListener(PlatformGrabListener pgl){
+
+    public static void addGrabListener(PlatformGrabListener pgl) {
         grabListeners.add(pgl);
     }
 
-    public static void setPlatformLibrary(PlatformBackend backend){
+    public static void setPlatformLibrary(PlatformBackend backend) {
         PLATFORM = backend;
         // To be picked by platform library
         if(mPendingSurface != null)
