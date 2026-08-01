@@ -31,13 +31,16 @@ public class Platform {
     private static List<PlatformGrabListener> grabListeners = new ArrayList<>();
     private static PlatformCursorImplementor mCursorImplementor = null;
     private static boolean isGrabbing = false;
-    public static double cursorX;
-    public static double cursorY;
+    public static double cursorX = 0.5;
+    public static double cursorY = 0.5;
     private static Surface mPendingSurface;
     private static PlatformGamepad mPlatformGamepad = null;
     private static PlatformCursor mPlatformCursor = null;
     private static GamepadEnableHandler mGamepadEnabler;
     private static AndroidGLFWClipboard mClipboard;
+
+    // Always reset cursor on grab lost - makes it move to the center as should if the game didn't move it
+    private static final boolean RESET_CURSOR_UNGRAB = true;
 
     public static void initialize(Activity activity) {
         mClipboard = new AndroidGLFWClipboard(activity.getApplicationContext());
@@ -69,8 +72,10 @@ public class Platform {
 
     // Can be received from non-UI threads
     public static void grabStateChanged(boolean grabbing) {
+        boolean wasGrabbing = isGrabbing;
         isGrabbing = grabbing;
         Tools.runOnUiThread(() -> {
+            if(RESET_CURSOR_UNGRAB && wasGrabbing && !isGrabbing) resetCursorPosition();
             if(mCursorImplementor != null) mCursorImplementor.onGrabState(grabbing);
             for(PlatformGrabListener listener : grabListeners) {
                 listener.onGrabState(grabbing);
@@ -116,6 +121,11 @@ public class Platform {
     public static void clampCursorPosition(){
         cursorX = Math.clamp(cursorX, 0f, 1f);
         cursorY = Math.clamp(cursorY, 0f, 1f);
+    }
+    public static void resetCursorPosition(){
+        // Reposition cursor to center (yup, this is center for now)
+        cursorX = 0.5;
+        cursorY = 0.5;
     }
     public static void addGrabListener(PlatformGrabListener pgl) {
         grabListeners.add(pgl);
