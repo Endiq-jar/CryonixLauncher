@@ -51,6 +51,8 @@ public class Platform {
     }
 
     private static void onInit(PlatformBackend impl) {
+        // We probably already initialized at this point. Don't try to initialize again
+        if(!(PLATFORM instanceof DummyBackend)) return;
         Platform.setPlatformLibrary(impl);
         ContextExecutor.executeActivity(activity -> ((MainActivity) activity).hideLoadingScreen());
     }
