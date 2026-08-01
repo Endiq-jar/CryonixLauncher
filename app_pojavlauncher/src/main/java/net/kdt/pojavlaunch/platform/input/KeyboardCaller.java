@@ -9,6 +9,11 @@ public class KeyboardCaller implements SDLKeyboardCaller {
 
     public void acceptKeyboard(int x, int y) {
         // TODO: panning support
-        Tools.runOnUiThread(() -> MainActivity.switchKeyboardState(false));
+        Tools.runOnUiThread(() -> MainActivity.toggleKeyboardState(true, false  ));
+    }
+
+    @Override
+    public void hideKeyboard() {
+        Tools.runOnUiThread(() -> MainActivity.toggleKeyboardState(false, false));
     }
 }
