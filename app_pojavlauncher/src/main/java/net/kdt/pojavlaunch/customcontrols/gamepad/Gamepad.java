@@ -130,8 +130,8 @@ public class Gamepad implements PlatformGrabListener, GamepadHandler {
         if(mTouchpadView.getVisibility() != View.VISIBLE) mTouchpadView.setVisibility(View.VISIBLE);
     }
 
-    public static void sendInput(short[] keycodes, boolean isDown){
-        for(short keycode : keycodes){
+    public static void sendInput(int[] keycodes, boolean isDown){
+        for(int keycode : keycodes){
             switch (keycode){
                 case GamepadMap.MOUSE_SCROLL_DOWN:
                     if(isDown) CallbackBridge.sendScroll(0, -1);
