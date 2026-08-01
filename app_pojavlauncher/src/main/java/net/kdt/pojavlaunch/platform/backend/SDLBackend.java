@@ -18,6 +18,10 @@ import git.mojo.sdl.SDLInputConnection;
 public class SDLBackend implements PlatformBackend{
     public SDLBackend(){
         SDLActivity.addGrabListener(Platform::grabStateChanged);
+        SDLActivity.setCursorCallback(cursor -> {
+            if(cursor != null) Platform.setCursor(cursor.getBitmap(), cursor.getXhot(), cursor.getYhot());
+            else Platform.setCursor(null, 0, 0);
+        });
     }
     public static void initialize(Activity activity) {
         // TODO: check what can be moved to the initialize point
