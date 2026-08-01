@@ -74,6 +74,20 @@ public class TouchCharInput extends androidx.appcompat.widget.AppCompatEditText 
         }
     }
 
+    /**
+     * Force keyboard state
+     */
+    public void switchKeyboardState(boolean state){
+        InputMethodManager imm = (InputMethodManager) getContext().getSystemService(INPUT_METHOD_SERVICE);
+        if(!state){
+            clear();
+            disable();
+        }else{
+            enable();
+            imm.showSoftInput(this, InputMethodManager.SHOW_IMPLICIT);
+        }
+    }
+
 
     /**
      * Clear the EditText from any leftover inputs

@@ -495,6 +495,12 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
             MainActivity.mForceFullPanning = panning;
         }
     }
+    public static void toggleKeyboardState(boolean state, boolean panning) {
+        if(touchCharInput != null) {
+            touchCharInput.switchKeyboardState(state);
+            MainActivity.mForceFullPanning = panning;
+        }
+    }
 
     public void hideLoadingScreen(){
         if(mLoadingScreen == null) return;
