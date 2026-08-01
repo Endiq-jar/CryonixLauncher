@@ -15,8 +15,17 @@ import git.mojo.sdl.SDLControllerManager;
 import git.mojo.sdl.SDLInputConnection;
 
 public class SDLBackend implements PlatformBackend{
+
+    private static void handleGrabStateChange(boolean isGrabbing){
+        // SDL really expects cursor to be at 0x0 position when relative mode (grabbing = true) is enabled
+        // This caused weird jumps when gaining grab because Platform cursor position values contain stale non-zero values at that point.
+        // Reset position to 0x0 when gaining grab state
+        Platform.cursorX = 0;
+        Platform.cursorY = 0;
+        Platform.grabStateChanged(isGrabbing);
+    }
     public SDLBackend(){
-        SDLActivity.setGrabListener(Platform::grabStateChanged);
+        SDLActivity.setGrabListener(SDLBackend::handleGrabStateChange);
         SDLActivity.setCursorCallback(cursor -> {
             if(cursor != null) Platform.setCursor(cursor.getBitmap(), cursor.getXhot(), cursor.getYhot());
             else Platform.setCursor(null, 0, 0);
