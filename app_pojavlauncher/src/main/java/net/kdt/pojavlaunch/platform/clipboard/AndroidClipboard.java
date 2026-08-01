@@ -7,9 +7,9 @@ import android.content.Context;
 import git.artdeell.dnbootstrap.glfw.GLFWClipboard;
 import git.mojo.sdl.SDLClipboard;
 
-public class AndroidGLFWClipboard implements GLFWClipboard, SDLClipboard {
+public class AndroidClipboard implements GLFWClipboard, SDLClipboard {
     private final ClipboardManager mClipboardManager;
-    public AndroidGLFWClipboard(Context context){
+    public AndroidClipboard(Context context){
         mClipboardManager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
     }
     @Override

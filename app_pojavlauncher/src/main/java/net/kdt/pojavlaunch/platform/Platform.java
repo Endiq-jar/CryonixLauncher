@@ -11,7 +11,7 @@ import net.kdt.pojavlaunch.platform.backend.GLFWBackend;
 import net.kdt.pojavlaunch.platform.backend.DummyBackend;
 import net.kdt.pojavlaunch.platform.backend.PlatformBackend;
 import net.kdt.pojavlaunch.platform.backend.SDLBackend;
-import net.kdt.pojavlaunch.platform.clipboard.AndroidGLFWClipboard;
+import net.kdt.pojavlaunch.platform.clipboard.AndroidClipboard;
 import net.kdt.pojavlaunch.platform.cursor.PlatformCursor;
 import net.kdt.pojavlaunch.platform.cursor.PlatformCursorImplementor;
 import net.kdt.pojavlaunch.platform.input.KeyboardCaller;
@@ -39,13 +39,13 @@ public class Platform {
     private static PlatformCursor mPlatformCursor = null;
     private static KeyboardCaller mKeyboardCaller = new KeyboardCaller();
     private static GamepadEnableHandler mGamepadEnabler;
-    private static AndroidGLFWClipboard mClipboard;
+    private static AndroidClipboard mClipboard;
 
     // Always reset cursor on grab lost - makes it move to the center as should if the game didn't move it
     private static final boolean RESET_CURSOR_UNGRAB = true;
 
     public static void initialize(Activity activity) {
-        mClipboard = new AndroidGLFWClipboard(activity.getApplicationContext());
+        mClipboard = new AndroidClipboard(activity.getApplicationContext());
         GLFW.setInitCallback(() -> onInit(new GLFWBackend()));
         SDLActivity.setInitCallback(() -> onInit(new SDLBackend()));
         SDLActivity.setClipboard(mClipboard);
