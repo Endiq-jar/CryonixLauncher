@@ -57,10 +57,7 @@ public class SDLBackend implements PlatformBackend{
     @Override
     public void sendMousePosition() {
         if(!Platform.isGrabbing()) Platform.clampCursorPosition();
-        // SDL uses coordinates in pixel space, the launcher uses normalized
-        float x = (float) (Platform.cursorX * LauncherGLSurface.getWindowWidth());
-        float y = (float) (Platform.cursorY * LauncherGLSurface.getWindowHeight());
-        SDLActivity.onNativeMouse(0, MotionEvent.ACTION_MOVE, x, y, Platform.isGrabbing());
+        SDLActivity.onNativeMouse(0, MotionEvent.ACTION_MOVE, (float) Platform.cursorX, (float) Platform.cursorY, Platform.isGrabbing());
         if(Platform.isGrabbing()){
             // SDL in relative mode expects these to be reset to 0 or it will freak out (classic:tm: way)
             Platform.cursorX = 0;
@@ -72,10 +69,7 @@ public class SDLBackend implements PlatformBackend{
 
     @Override
     public void sendMouseEvent(int key, int state, int mods) {
-        // SDL uses coordinates in pixel space, the launcher uses normalized
-        float x = (float) (Platform.cursorX * LauncherGLSurface.getWindowWidth());
-        float y = (float) (Platform.cursorY * LauncherGLSurface.getWindowHeight());
-        SDLActivity.onNativeMouseButton(key, state, x, y, Platform.isGrabbing());
+        SDLActivity.onNativeMouseButton(key, state, (float) Platform.cursorX, (float) Platform.cursorY, Platform.isGrabbing());
     }
 
     @Override

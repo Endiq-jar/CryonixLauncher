@@ -11,6 +11,7 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 
+import net.kdt.pojavlaunch.LauncherGLSurface;
 import net.kdt.pojavlaunch.platform.Platform;
 
 import git.artdeell.dnbootstrap.glfw.FallbackCursorDrawable;
@@ -44,7 +45,10 @@ public class PlatformCursorView extends View implements PlatformCursorImplemento
     @Override
     protected void onDraw(@NonNull Canvas canvas) {
         if(noDraw) return;
-        canvas.translate((int)(Platform.cursorX * getWidth()), (int)(Platform.cursorY * getHeight()));
+        // Normalize coordinates to fit the whole screen
+        int dx = (int)((Platform.cursorX / LauncherGLSurface.getWindowWidth()) * getWidth());
+        int dy = (int)((Platform.cursorY / LauncherGLSurface.getWindowHeight()) * getHeight());
+        canvas.translate(dx, dy);
         PlatformCursor cursor = Platform.getCursor();
         canvas.scale(mouseScale, mouseScale);
         if(cursor == null) {

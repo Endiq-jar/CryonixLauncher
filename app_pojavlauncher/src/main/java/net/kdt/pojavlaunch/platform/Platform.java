@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.graphics.Bitmap;
 import android.view.Surface;
 
+import net.kdt.pojavlaunch.LauncherGLSurface;
 import net.kdt.pojavlaunch.MainActivity;
 import net.kdt.pojavlaunch.Tools;
 import net.kdt.pojavlaunch.lifecycle.ContextExecutor;
@@ -32,8 +33,8 @@ public class Platform {
     private static List<PlatformGrabListener> grabListeners = new ArrayList<>();
     private static PlatformCursorImplementor mCursorImplementor = null;
     private static boolean isGrabbing = false;
-    public static double cursorX = 0.5;
-    public static double cursorY = 0.5;
+    public static double cursorX;
+    public static double cursorY;
     private static Surface mPendingSurface;
     private static PlatformGamepad mPlatformGamepad = null;
     private static PlatformCursor mPlatformCursor = null;
@@ -62,6 +63,7 @@ public class Platform {
         if(!(PLATFORM instanceof DummyBackend)) return;
         Platform.setPlatformLibrary(impl);
         ContextExecutor.executeActivity(activity -> ((MainActivity) activity).hideLoadingScreen());
+        resetCursorPosition();
     }
 
     public static boolean isGrabbing() {
@@ -125,13 +127,12 @@ public class Platform {
     }
 
     public static void clampCursorPosition(){
-        cursorX = Math.clamp(cursorX, 0f, 1f);
-        cursorY = Math.clamp(cursorY, 0f, 1f);
+        cursorX = Math.clamp(cursorX, 0, LauncherGLSurface.getWindowWidth());
+        cursorY = Math.clamp(cursorY, 0f, LauncherGLSurface.getWindowHeight());
     }
     public static void resetCursorPosition(){
-        // Reposition cursor to center (yup, this is center for now)
-        cursorX = 0.5;
-        cursorY = 0.5;
+        cursorX = (double) LauncherGLSurface.getWindowWidth() / 2;
+        cursorY = (double) LauncherGLSurface.getWindowHeight() / 2;
     }
     public static void addGrabListener(PlatformGrabListener pgl) {
         grabListeners.add(pgl);

@@ -12,6 +12,7 @@ import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.WindowManager;
 
+import net.kdt.pojavlaunch.LauncherGLSurface;
 import net.kdt.pojavlaunch.platform.input.PlatformGrabListener;
 import net.kdt.pojavlaunch.platform.Platform;
 import net.kdt.pojavlaunch.prefs.LauncherPreferences;
@@ -106,21 +107,24 @@ public class GyroControl implements SensorEventListener, PlatformGrabListener {
         float absX = Math.abs(mStoredX);
         float absY = Math.abs(mStoredY);
 
+        int width = LauncherGLSurface.getWindowWidth();
+        int height = LauncherGLSurface.getWindowHeight();
+
         if(absX + absY > MULTI_AXIS_LOW_PASS_THRESHOLD) {
-            Platform.cursorX -= ((mSwapXY ? mStoredY : mStoredX) * xFactor);
-            Platform.cursorY += ((mSwapXY ? mStoredX : mStoredY) * yFactor);
+            Platform.cursorX -= ((mSwapXY ? mStoredY : mStoredX) * xFactor) * width;
+            Platform.cursorY += ((mSwapXY ? mStoredX : mStoredY) * yFactor) * height;
             mStoredX = 0;
             mStoredY = 0;
             updatePosition = true;
         } else {
             if(Math.abs(mStoredX) > SINGLE_AXIS_LOW_PASS_THRESHOLD){
-                Platform.cursorX -= ((mSwapXY ? mStoredY : mStoredX) * xFactor);
+                Platform.cursorX -= ((mSwapXY ? mStoredY : mStoredX) * xFactor) * width;
                 mStoredX = 0;
                 updatePosition = true;
             }
 
             if(Math.abs(mStoredY) > SINGLE_AXIS_LOW_PASS_THRESHOLD) {
-                Platform.cursorY += ((mSwapXY ? mStoredX : mStoredY) * yFactor);
+                Platform.cursorY += ((mSwapXY ? mStoredX : mStoredY) * yFactor) * height;
                 mStoredY = 0;
                 updatePosition = true;
             }

@@ -18,6 +18,7 @@ import android.view.View;
 
 
 import net.kdt.pojavlaunch.CallbackBridge;
+import net.kdt.pojavlaunch.LauncherGLSurface;
 import net.kdt.pojavlaunch.platform.input.PlatformGrabListener;
 import net.kdt.pojavlaunch.platform.Platform;
 
@@ -96,7 +97,7 @@ public class Gamepad implements PlatformGrabListener, GamepadHandler {
         mMapProvider = mapProvider;
         mTouchpadView = touchpadView;
 
-        Platform.cursorX = Platform.cursorY = 0.5;
+        Platform.resetCursorPosition();
         PLATFORM.sendMousePosition();
 
         enableTouchpadIfNecessary();
@@ -191,8 +192,8 @@ public class Gamepad implements PlatformGrabListener, GamepadHandler {
             deltaX *= deltaTimeScale;
             deltaY *= deltaTimeScale;
 
-            Platform.cursorX += deltaX / 1000;
-            Platform.cursorY -= deltaY / 1000;
+            Platform.cursorX += deltaX;
+            Platform.cursorY -= deltaY;
 
             //Send the mouse to the game
             PLATFORM.sendMousePosition();

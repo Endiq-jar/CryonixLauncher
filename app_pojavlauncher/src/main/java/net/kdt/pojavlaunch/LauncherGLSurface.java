@@ -142,8 +142,8 @@ public class LauncherGLSurface extends View implements PlatformGrabListener, Gam
             // Mouse found
             // Avoid going through the JNI each time.
             if(Platform.isGrabbing()) return false;
-            Platform.cursorX = e.getX(i) / getWidth();
-            Platform.cursorY = e.getY(i) / getHeight();
+            Platform.cursorX = e.getX(i);
+            Platform.cursorY = e.getY(i);
             PLATFORM.sendMousePosition();
             return true; //mouse event handled successfully
         }
@@ -152,7 +152,7 @@ public class LauncherGLSurface extends View implements PlatformGrabListener, Gam
         // Keep cursor on screen if panning with IME inset
         if(LauncherPreferences.PREF_KEYBOARD_AUTOPANNING && MainActivity.mImeHeight > 0){
             int translationY = Tools.getTranslationFromCursorY(
-                    (int)(Platform.cursorY * mSurface.getHeight() + 100),
+                    (int)(Platform.cursorY + 100),
                     mSurface.getHeight(),
                     MainActivity.mImeHeight,
                     0
