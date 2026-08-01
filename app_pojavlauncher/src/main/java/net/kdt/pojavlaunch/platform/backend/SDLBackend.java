@@ -76,10 +76,7 @@ public class SDLBackend implements PlatformBackend{
         // SDL uses coordinates in pixel space, the launcher uses normalized
         float x = (float) (Platform.cursorX * LauncherGLSurface.getWindowWidth());
         float y = (float) (Platform.cursorY * LauncherGLSurface.getWindowHeight());
-        if(state == KeyEvent.ACTION_DOWN)
-            SDLActivity.onNativeMouseButton(key, KeyEvent.ACTION_DOWN, x, y, Platform.isGrabbing());
-        else
-            SDLActivity.onNativeMouseButton(key, KeyEvent.ACTION_UP, x, y, Platform.isGrabbing());
+        SDLActivity.onNativeMouseButton(key, state, x, y, Platform.isGrabbing());
     }
 
     @Override
