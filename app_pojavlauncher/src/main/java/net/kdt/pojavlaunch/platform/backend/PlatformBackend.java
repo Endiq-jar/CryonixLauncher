@@ -14,4 +14,5 @@ public interface PlatformBackend {
     void sendKeyEvent(int key, boolean state, int mods);
     void sendScrollEvent(double x, double y);
     void sendBulkUnicodeEvent(String text, int mods);
+    String backendName();
 }

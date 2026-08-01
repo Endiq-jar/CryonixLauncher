@@ -8,16 +8,15 @@ import net.kdt.pojavlaunch.LwjglGlfwKeycode;
 import net.kdt.pojavlaunch.platform.Platform;
 
 import git.artdeell.dnbootstrap.glfw.GLFW;
-import git.artdeell.dnbootstrap.glfw.GrabListener;
 
 /*
 Static provider for GLFW
  */
 public class GLFWBackend implements PlatformBackend {
-    private static final GrabListener BASE_GRAB_LISTENER = Platform::grabStateChanged;
-
     public GLFWBackend(){
-        GLFW.addGrabListener(BASE_GRAB_LISTENER);
+        GLFW.setGrabListener(Platform::grabStateChanged);
+        GLFW.setPositionCallback(Platform::setCursorPosition);
+        GLFW.setCursorCallback(cursor -> Platform.setCursor(cursor.getBitmap(), cursor.getXhot(), cursor.getYhot()));
         GLFW.setGamepadEnableHandler(Platform.getGamepadEnableHandler());
     }
     public static void initialize() {}
@@ -39,14 +38,8 @@ public class GLFWBackend implements PlatformBackend {
 
     @Override
     public void sendMousePosition() {
-        // I'm not sure if GLFW does this already
-        if(!Platform.isGrabbing()){
-            Platform.cursorX = Math.clamp(Platform.cursorX, 0, 1);
-            Platform.cursorY = Math.clamp(Platform.cursorY, 0, 1);
-        }
-        GLFW.cursorX = Platform.cursorX;
-        GLFW.cursorY = Platform.cursorY;
-        GLFW.sendMousePos();
+        if(!Platform.isGrabbing()) Platform.clampCursorPosition();
+        GLFW.sendMousePosition0(Platform.cursorX, Platform.cursorY);
         Platform.getCursorImplementor().onCursorPosition();
     }
 
@@ -86,5 +79,10 @@ public class GLFWBackend implements PlatformBackend {
     @Override
     public void sendBulkUnicodeEvent(String text, int mods) {
         GLFW.sendBulkUnicodeEvent(text, mods);
+    }
+
+    @Override
+    public String backendName() {
+        return "GLFW";
     }
 }

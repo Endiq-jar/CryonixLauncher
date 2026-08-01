@@ -1,15 +1,17 @@
 package net.kdt.pojavlaunch.platform;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
 import android.view.Surface;
 
 import net.kdt.pojavlaunch.MainActivity;
+import net.kdt.pojavlaunch.Tools;
 import net.kdt.pojavlaunch.lifecycle.ContextExecutor;
 import net.kdt.pojavlaunch.platform.backend.GLFWBackend;
 import net.kdt.pojavlaunch.platform.backend.DummyBackend;
 import net.kdt.pojavlaunch.platform.backend.PlatformBackend;
 import net.kdt.pojavlaunch.platform.backend.SDLBackend;
-import net.kdt.pojavlaunch.platform.clipboard.AndroidClipboard;
+import net.kdt.pojavlaunch.platform.clipboard.AndroidGLFWClipboard;
 import net.kdt.pojavlaunch.platform.cursor.PlatformCursor;
 import net.kdt.pojavlaunch.platform.cursor.PlatformCursorImplementor;
 import net.kdt.pojavlaunch.platform.input.PlatformGamepad;
@@ -35,10 +37,10 @@ public class Platform {
     private static PlatformGamepad mPlatformGamepad = null;
     private static PlatformCursor mPlatformCursor = null;
     private static GamepadEnableHandler mGamepadEnabler;
-    private static AndroidClipboard mClipboard;
+    private static AndroidGLFWClipboard mClipboard;
 
     public static void initialize(Activity activity) {
-        mClipboard = new AndroidClipboard(activity.getApplicationContext());
+        mClipboard = new AndroidGLFWClipboard(activity.getApplicationContext());
         GLFW.setInitCallback(() -> onInit(new GLFWBackend()));
         SDLActivity.setInitCallback(() -> onInit(new SDLBackend()));
         SDLActivity.setClipboard(mClipboard);
@@ -65,12 +67,15 @@ public class Platform {
         mPendingSurface = surface;
     }
 
+    // Can be received from non-UI threads
     public static void grabStateChanged(boolean grabbing) {
         isGrabbing = grabbing;
-        if(mCursorImplementor != null) mCursorImplementor.onGrabState(grabbing);
-        for(PlatformGrabListener listener : grabListeners) {
-            listener.onGrabState(grabbing);
-        }
+        Tools.runOnUiThread(() -> {
+            if(mCursorImplementor != null) mCursorImplementor.onGrabState(grabbing);
+            for(PlatformGrabListener listener : grabListeners) {
+                listener.onGrabState(grabbing);
+            }
+        });
     }
 
     public static PlatformGamepad getPlatformGamepad() {
@@ -79,6 +84,10 @@ public class Platform {
 
     public static PlatformCursor getCursor() {
         return mPlatformCursor;
+    }
+    public static void setCursor(Bitmap bitmap, int xhot, int yhot){
+        mPlatformCursor = new PlatformCursor(bitmap, xhot, yhot);
+        mCursorImplementor.onCursorChanged();
     }
 
     public static void setCursorImplementor(PlatformCursorImplementor implementor) {
@@ -98,6 +107,16 @@ public class Platform {
         return mGamepadEnabler;
     }
 
+    public static void setCursorPosition(double x, double y) {
+        cursorX = x;
+        cursorY = y;
+        mCursorImplementor.onCursorPosition();
+    }
+
+    public static void clampCursorPosition(){
+        cursorX = Math.clamp(cursorX, 0f, 1f);
+        cursorY = Math.clamp(cursorY, 0f, 1f);
+    }
     public static void addGrabListener(PlatformGrabListener pgl) {
         grabListeners.add(pgl);
     }

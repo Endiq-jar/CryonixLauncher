@@ -56,4 +56,9 @@ public class DummyBackend implements PlatformBackend {
     public void sendBulkUnicodeEvent(String text, int mods) {
 
     }
+
+    @Override
+    public String backendName() {
+        return "You must not see this!";
+    }
 }

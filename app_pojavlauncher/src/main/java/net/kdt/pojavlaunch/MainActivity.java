@@ -74,7 +74,6 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 
-import git.artdeell.dnbootstrap.glfw.AndroidClipboardProvider;
 import git.artdeell.dnbootstrap.glfw.GLFW;
 import git.artdeell.mojo.R;
 
@@ -318,7 +317,7 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
         ContextExecutor.clearActivity();
         mGyroControl.disable();
         // Avoid going through the JNI each time.
-        if (GLFW.isGrabbing()){
+        if (Platform.isGrabbing()){
             CallbackBridge.sendKeyPress(KeyEvent.KEYCODE_ESCAPE);
         }
         if(mQuickSettingSideDialog != null) {
@@ -499,7 +498,7 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
 
     public void hideLoadingScreen(){
         if(mLoadingScreen == null) return;
-        ((TextView) mLoadingScreen.findViewById(R.id.main_loading_screen_text)).setText(R.string.loading_screen_booted);
+        ((TextView) mLoadingScreen.findViewById(R.id.main_loading_screen_text)).setText(getString(R.string.loading_screen_booted, Platform.PLATFORM.backendName()));
         mLoadingScreen.animate()
                 .alpha(0f)
                 .setDuration(300)

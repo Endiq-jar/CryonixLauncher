@@ -17,9 +17,7 @@ import git.mojo.sdl.SDLInputConnection;
 
 public class SDLBackend implements PlatformBackend{
     public SDLBackend(){
-        SDLActivity.addGrabListener(isGrabbing -> {
-            Tools.runOnUiThread(() -> Platform.grabStateChanged(isGrabbing));
-        });
+        SDLActivity.addGrabListener(Platform::grabStateChanged);
     }
     public static void initialize(Activity activity) {
         // TODO: check what can be moved to the initialize point
@@ -54,10 +52,7 @@ public class SDLBackend implements PlatformBackend{
 
     @Override
     public void sendMousePosition() {
-        if(!Platform.isGrabbing()){
-            Platform.cursorX = Math.clamp(Platform.cursorX, 0, 1);
-            Platform.cursorY = Math.clamp(Platform.cursorY, 0, 1);
-        }
+        if(!Platform.isGrabbing()) Platform.clampCursorPosition();
         // SDL uses coordinates in pixel space, the launcher uses normalized
         float x = (float) (Platform.cursorX * LauncherGLSurface.getWindowWidth());
         float y = (float) (Platform.cursorY * LauncherGLSurface.getWindowHeight());
@@ -105,5 +100,10 @@ public class SDLBackend implements PlatformBackend{
     @Override
     public void sendBulkUnicodeEvent(String text, int mods) {
         SDLInputConnection.nativeCommitText(text, mods);
+    }
+
+    @Override
+    public String backendName() {
+        return "SDL";
     }
 }
