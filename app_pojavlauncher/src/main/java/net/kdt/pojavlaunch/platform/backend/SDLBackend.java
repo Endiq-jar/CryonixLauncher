@@ -1,6 +1,7 @@
 package net.kdt.pojavlaunch.platform.backend;
 
 import android.app.Activity;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.Surface;
 
@@ -79,7 +80,7 @@ public class SDLBackend implements PlatformBackend{
 
     @Override
     public void sendKeyEvent(int key, int state, int mods, char codepoint) {
-        if(state == 1) {
+        if(state == KeyEvent.ACTION_DOWN) {
             SDLActivity.onNativeKeyDown(key);
             if(codepoint != 0) SDLInputConnection.nativeCommitText(String.valueOf(codepoint), 0);
         }
