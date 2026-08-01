@@ -105,7 +105,7 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
 
     private QuickSettingSideDialog mQuickSettingSideDialog;
 
-    public static boolean mForceFullPanning = false;
+    public static int mForcedPanningHeight = 0;
     public static int mImeHeight = 0;
 
     @Override
@@ -162,21 +162,21 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
                 }
                 return insets;
             }
-            if(!mForceFullPanning && !LauncherPreferences.PREF_KEYBOARD_AUTOPANNING)
+            if(mForcedPanningHeight == 0 && !LauncherPreferences.PREF_KEYBOARD_AUTOPANNING)
                 return insets;
             mImeHeight = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom;
             int translationY;
             // Autopanning (if keyboardPan wasn't clicked)
-            if(!mForceFullPanning) {
-                int cursorY = (int) (Platform.cursorY * launcherGLView.mSurface.getHeight()) + 100;
+            if(mForcedPanningHeight == 0) {
+                int cursorY = (int)((Platform.cursorY / LauncherGLSurface.getWindowHeight()) * launcherGLView.getHeight()) + 100;
                 translationY = Tools.getTranslationFromCursorY(
                         cursorY,
-                        launcherGLView.mSurface.getHeight(),
+                        launcherGLView.getHeight(),
                         mImeHeight,
                         0
                 );
             } else
-                translationY = mImeHeight;
+                translationY = mForcedPanningHeight == -1 ? mImeHeight : Math.clamp(mImeHeight - mForcedPanningHeight, 0, mImeHeight);
             animSurface.translationY(-translationY).start();
             animCursor.translationY(-translationY).start();
             return insets;
@@ -494,13 +494,13 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
     public static void switchKeyboardState(boolean panning) {
         if(touchCharInput != null) {
             touchCharInput.switchKeyboardState();
-            MainActivity.mForceFullPanning = panning;
+            MainActivity.mForcedPanningHeight = panning ? -1 : 0;
         }
     }
-    public static void toggleKeyboardState(boolean state, boolean panning) {
+    public static void toggleKeyboardState(boolean state, int panningHeight) {
         if(touchCharInput != null) {
             touchCharInput.switchKeyboardState(state);
-            MainActivity.mForceFullPanning = panning;
+            MainActivity.mForcedPanningHeight = panningHeight;
         }
     }
 
