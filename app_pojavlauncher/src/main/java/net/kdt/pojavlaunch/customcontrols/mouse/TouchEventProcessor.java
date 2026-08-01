@@ -5,6 +5,7 @@ import static net.kdt.pojavlaunch.platform.Platform.PLATFORM;
 import android.view.MotionEvent;
 import android.view.View;
 
+import net.kdt.pojavlaunch.LauncherGLSurface;
 import net.kdt.pojavlaunch.platform.Platform;
 import net.kdt.pojavlaunch.prefs.LauncherPreferences;
 
@@ -15,8 +16,8 @@ public abstract class TouchEventProcessor {
     }
 
     protected void sendTouchCoordinates(float x, float y) {
-        Platform.cursorX = x;
-        Platform.cursorY = y;
+        Platform.cursorX = (x / mHostView.getWidth()) * LauncherGLSurface.getWindowWidth();
+        Platform.cursorY = (y / mHostView.getHeight()) * LauncherGLSurface.getWindowHeight();
         PLATFORM.sendMousePosition();
     }
 
