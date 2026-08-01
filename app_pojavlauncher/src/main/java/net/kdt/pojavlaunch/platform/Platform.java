@@ -86,7 +86,7 @@ public class Platform {
         return mPlatformCursor;
     }
     public static void setCursor(Bitmap bitmap, int xhot, int yhot){
-        mPlatformCursor = new PlatformCursor(bitmap, xhot, yhot);
+        mPlatformCursor = bitmap == null ? null : new PlatformCursor(bitmap, xhot, yhot);
         mCursorImplementor.onCursorChanged();
     }
 
