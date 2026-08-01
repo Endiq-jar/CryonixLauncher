@@ -1,12 +1,10 @@
 package net.kdt.pojavlaunch.platform.backend;
 
 import android.app.Activity;
-import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.Surface;
 
 import net.kdt.pojavlaunch.LauncherGLSurface;
-import net.kdt.pojavlaunch.Tools;
 import net.kdt.pojavlaunch.platform.Platform;
 
 import git.mojo.sdl.SDL;
@@ -81,7 +79,10 @@ public class SDLBackend implements PlatformBackend{
 
     @Override
     public void sendKeyEvent(int key, int state, int mods, char codepoint) {
-        if(state == 1) SDLActivity.onNativeKeyDown(key);
+        if(state == 1) {
+            SDLActivity.onNativeKeyDown(key);
+            if(codepoint != 0) SDLInputConnection.nativeCommitText(String.valueOf(codepoint), 0);
+        }
         else SDLActivity.onNativeKeyUp(key);
     }
 
@@ -104,7 +105,7 @@ public class SDLBackend implements PlatformBackend{
 
     @Override
     public void sendBulkUnicodeEvent(String text, int mods) {
-        SDLInputConnection.nativeCommitText(text, mods);
+        SDLInputConnection.nativeCommitText(text, 0);
     }
 
     @Override
