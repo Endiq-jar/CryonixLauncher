@@ -16,7 +16,7 @@ public class GLFWBackend implements PlatformBackend {
     public GLFWBackend(){
         GLFW.setGrabListener(Platform::grabStateChanged);
         GLFW.setPositionCallback(Platform::setCursorPosition);
-        GLFW.setCursorCallback(cursor -> Platform.setCursor(cursor.getBitmap(), cursor.getXhot(), cursor.getYhot()));
+        GLFW.setCursorCallback(cursor -> {if(cursor != null) Platform.setCursor(cursor.getBitmap(), cursor.getXhot(), cursor.getYhot());});
         GLFW.setGamepadEnableHandler(Platform.getGamepadEnableHandler());
     }
     public static void initialize() {}
