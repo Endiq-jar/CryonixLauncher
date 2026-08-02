@@ -15,7 +15,6 @@ import net.kdt.pojavlaunch.platform.backend.SDLBackend;
 import net.kdt.pojavlaunch.platform.clipboard.AndroidClipboard;
 import net.kdt.pojavlaunch.platform.cursor.PlatformCursor;
 import net.kdt.pojavlaunch.platform.cursor.PlatformCursorImplementor;
-import net.kdt.pojavlaunch.platform.input.KeyboardCaller;
 import net.kdt.pojavlaunch.platform.input.PlatformGamepad;
 import net.kdt.pojavlaunch.platform.input.PlatformGrabListener;
 import net.kdt.pojavlaunch.platform.input.SDLGamepad;
@@ -38,7 +37,6 @@ public class Platform {
     private static Surface mPendingSurface;
     private static PlatformGamepad mPlatformGamepad = null;
     private static PlatformCursor mPlatformCursor = null;
-    private static KeyboardCaller mKeyboardCaller = new KeyboardCaller();
     private static GamepadEnableHandler mGamepadEnabler;
     private static AndroidClipboard mClipboard;
 
@@ -114,10 +112,6 @@ public class Platform {
 
     public static GamepadEnableHandler getGamepadEnableHandler() {
         return mGamepadEnabler;
-    }
-
-    public static KeyboardCaller getKeyboardCaller() {
-        return mKeyboardCaller;
     }
 
     public static void setCursorPosition(double x, double y) {

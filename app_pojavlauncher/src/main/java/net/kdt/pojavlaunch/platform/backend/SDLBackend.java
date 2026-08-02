@@ -32,7 +32,6 @@ public class SDLBackend implements PlatformBackend{
             if(cursor != null) Platform.setCursor(cursor.getBitmap(), cursor.getXhot(), cursor.getYhot());
             else Platform.setCursor(null, 0, 0);
         });
-        SDLActivity.setKeyboardCaller(Platform.getKeyboardCaller());
     }
     public static void initialize(Activity activity) {
         // TODO: check what can be moved to the initialize point
