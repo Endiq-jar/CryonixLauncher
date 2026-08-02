@@ -83,7 +83,7 @@ public class SDLBackend implements PlatformBackend{
 
     @Override
     public void sendKeyEvent(int key, int state, int mods, char codepoint) {
-        if(state == KeyEvent.ACTION_DOWN) {
+        if(state == 1) {
             SDLActivity.onNativeKeyDown(key);
             if(codepoint != 0) SDLInputConnection.nativeCommitText(String.valueOf(codepoint), 0);
         }
