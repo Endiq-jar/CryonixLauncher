@@ -128,6 +128,11 @@ public class Platform {
         cursorX = (double) LauncherGLSurface.getWindowWidth() / 2;
         cursorY = (double) LauncherGLSurface.getWindowHeight() / 2;
     }
+    public static void sendCursorPosition(){
+        mCursorImplementor.onCursorPosition();
+        if(!isGrabbing) clampCursorPosition();
+        PLATFORM.sendMousePosition();
+    }
     public static void addGrabListener(PlatformGrabListener pgl) {
         grabListeners.add(pgl);
     }

@@ -124,7 +124,7 @@ public class AndroidPointerCapture implements ViewTreeObserver.OnWindowFocusChan
     private void applyMotionVector(View view, float speed) {
         Platform.cursorX += mVector[0] * speed;
         Platform.cursorY += mVector[1] * speed;
-        PLATFORM.sendMousePosition();
+        Platform.sendCursorPosition();
     }
 
     private void checkSameDevice(InputDevice inputDevice) {

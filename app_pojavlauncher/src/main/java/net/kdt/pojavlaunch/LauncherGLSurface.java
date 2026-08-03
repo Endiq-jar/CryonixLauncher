@@ -143,7 +143,7 @@ public class LauncherGLSurface extends View implements PlatformGrabListener, Gam
             if(Platform.isGrabbing()) return false;
             Platform.cursorX = e.getX(i);
             Platform.cursorY = e.getY(i);
-            PLATFORM.sendMousePosition();
+            Platform.sendCursorPosition();
             return true; //mouse event handled successfully
         }
         if (mIngameProcessor == null || mInGUIProcessor == null) return true;
@@ -209,7 +209,7 @@ public class LauncherGLSurface extends View implements PlatformGrabListener, Gam
             case MotionEvent.ACTION_HOVER_MOVE:
                 Platform.cursorX = event.getX(mouseCursorIndex) / getWidth();
                 Platform.cursorY = event.getY(mouseCursorIndex) / getHeight();
-                PLATFORM.sendMousePosition();
+                Platform.sendCursorPosition();
                 return true;
             case MotionEvent.ACTION_SCROLL:
                 CallbackBridge.sendScroll(event.getAxisValue(MotionEvent.AXIS_HSCROLL), event.getAxisValue(MotionEvent.AXIS_VSCROLL));

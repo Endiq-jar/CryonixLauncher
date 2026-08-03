@@ -66,14 +66,12 @@ public class SDLBackend implements PlatformBackend{
 
     @Override
     public void sendMousePosition() {
-        if(!Platform.isGrabbing()) Platform.clampCursorPosition();
         SDLActivity.onNativeMouse(0, MotionEvent.ACTION_MOVE, (float) Platform.cursorX, (float) Platform.cursorY, Platform.isGrabbing());
         if(Platform.isGrabbing()){
             // SDL in relative mode expects these to be reset to 0 or it will freak out (classic:tm: way)
             Platform.cursorX = 0;
             Platform.cursorY = 0;
         }
-        Platform.getCursorImplementor().onCursorPosition();
     }
 
 

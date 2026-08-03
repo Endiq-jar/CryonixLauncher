@@ -18,7 +18,7 @@ public abstract class TouchEventProcessor {
     protected void sendTouchCoordinates(float x, float y) {
         Platform.cursorX = (x / mHostView.getWidth()) * LauncherGLSurface.getWindowWidth();
         Platform.cursorY = (y / mHostView.getHeight()) * LauncherGLSurface.getWindowHeight();
-        PLATFORM.sendMousePosition();
+        Platform.sendCursorPosition();
     }
 
     protected void applyMoveVector(float[] vector) {
@@ -28,7 +28,7 @@ public abstract class TouchEventProcessor {
     protected void applyMoveVector(float x, float y) {
         Platform.cursorX += x * LauncherPreferences.PREF_MOUSESPEED;
         Platform.cursorY += y * LauncherPreferences.PREF_MOUSESPEED;
-        PLATFORM.sendMousePosition();
+        Platform.sendCursorPosition();
     }
 
     abstract public boolean processTouchEvent(MotionEvent motionEvent);

@@ -131,7 +131,7 @@ public class GyroControl implements SensorEventListener, PlatformGrabListener {
         }
 
         if(updatePosition){
-            PLATFORM.sendMousePosition();
+            Platform.sendCursorPosition();
         }
     }
 

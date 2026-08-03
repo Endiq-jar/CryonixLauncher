@@ -98,7 +98,7 @@ public class Gamepad implements PlatformGrabListener, GamepadHandler {
         mTouchpadView = touchpadView;
 
         Platform.resetCursorPosition();
-        PLATFORM.sendMousePosition();
+        Platform.sendCursorPosition();
 
         enableTouchpadIfNecessary();
 
@@ -196,7 +196,7 @@ public class Gamepad implements PlatformGrabListener, GamepadHandler {
             Platform.cursorY -= deltaY;
 
             //Send the mouse to the game
-            PLATFORM.sendMousePosition();
+            Platform.sendCursorPosition();
         }
 
         // Update last nano time
