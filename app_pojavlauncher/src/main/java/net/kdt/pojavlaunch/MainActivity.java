@@ -75,7 +75,6 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 
-import git.artdeell.dnbootstrap.glfw.GLFW;
 import git.artdeell.mojo.R;
 
 public class MainActivity extends BaseActivity implements ControlButtonMenuListener, EditorExitable, ServiceConnection {
@@ -501,7 +500,7 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
     }
     public static void toggleKeyboardState(boolean state, int panningHeight) {
         if(touchCharInput != null) {
-            touchCharInput.switchKeyboardState(state);
+            touchCharInput.setKeyboardState(state);
             MainActivity.mForcedPanningHeight = panningHeight;
         }
     }
