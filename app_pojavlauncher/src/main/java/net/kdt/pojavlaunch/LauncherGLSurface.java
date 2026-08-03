@@ -298,6 +298,16 @@ public class LauncherGLSurface extends View implements PlatformGrabListener, Gam
         }
         windowWidth = newWidth;
         windowHeight = newHeight;
+
+        // Update cursor ratio values
+        // Mouse events are sent in the full view coordinate space, the game accepts them only in the window space
+        double ratioX = (double) getWidth() / windowWidth;
+        double ratioY = (double) getHeight() / windowHeight;
+        if(Platform.getCursorImplementor() != null)
+            Platform.getCursorImplementor().onCursorRatioUpdate(ratioX, ratioY);
+        if(mCurrentTouchProcessor != null)
+            mCurrentTouchProcessor.updateCursorRatio(ratioX, ratioY);
+
         windowRate = mSurface.getDisplay().getRefreshRate();
         if(mSurface == null){
             Log.w("MGLSurface", "Attempt to refresh size on null surface");

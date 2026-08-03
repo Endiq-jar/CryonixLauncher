@@ -2,6 +2,7 @@ package net.kdt.pojavlaunch.customcontrols.mouse;
 
 import static net.kdt.pojavlaunch.platform.Platform.PLATFORM;
 
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -11,13 +12,18 @@ import net.kdt.pojavlaunch.prefs.LauncherPreferences;
 
 public abstract class TouchEventProcessor {
     private final View mHostView;
+    private double ratioX, ratioY;
     public TouchEventProcessor(View hostView) {
         mHostView = hostView;
     }
+    public void updateCursorRatio(double ratioX, double ratioY){
+        this.ratioX = ratioX;
+        this.ratioY = ratioY;
+    }
 
     protected void sendTouchCoordinates(float x, float y) {
-        Platform.cursorX = (x / mHostView.getWidth()) * LauncherGLSurface.getWindowWidth();
-        Platform.cursorY = (y / mHostView.getHeight()) * LauncherGLSurface.getWindowHeight();
+        Platform.cursorX = x / ratioX;
+        Platform.cursorY = y / ratioY;
         Platform.sendCursorPosition();
     }
 
