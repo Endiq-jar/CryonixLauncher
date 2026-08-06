@@ -308,12 +308,12 @@ public class LauncherGLSurface extends View implements PlatformGrabListener, Gam
         if(mCurrentTouchProcessor != null)
             mCurrentTouchProcessor.updateCursorRatio(ratioX, ratioY);
 
-        windowRate = mSurface.getDisplay().getRefreshRate();
         if(mSurface == null){
             Log.w("MGLSurface", "Attempt to refresh size on null surface");
             return;
         }
-        MojoExec.setDisplayParams(windowWidth, windowHeight, mSurface.getDisplay().getRefreshRate());
+        windowRate = mSurface.getDisplay().getRefreshRate();
+        MojoExec.setDisplayParams(windowWidth, windowHeight, windowRate);
         mSurfaceProvider.updateSize();
     }
 
