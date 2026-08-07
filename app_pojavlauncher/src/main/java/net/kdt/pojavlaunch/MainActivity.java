@@ -168,9 +168,8 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
             int translationY;
             // Autopanning (if keyboardPan wasn't clicked)
             if(mForcedPanningHeight == 0) {
-                int cursorY = (int)((Platform.cursorY / LauncherGLSurface.getWindowHeight()) * launcherGLView.getHeight()) + 100;
                 translationY = Tools.getTranslationFromCursorY(
-                        cursorY,
+                        (int)(Platform.cursorY * launcherGLView.getCursorRatioY() + 100),
                         launcherGLView.getHeight(),
                         mImeHeight,
                         0

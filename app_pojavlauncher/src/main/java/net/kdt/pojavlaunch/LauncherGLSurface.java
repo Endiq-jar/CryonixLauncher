@@ -143,8 +143,8 @@ public class LauncherGLSurface extends View implements PlatformGrabListener, Gam
             // Mouse found
             // Avoid going through the JNI each time.
             if(Platform.isGrabbing()) return false;
-            Platform.cursorX = e.getX(i);
-            Platform.cursorY = e.getY(i);
+            Platform.cursorX = e.getX(i) / cursorRatioX;
+            Platform.cursorY = e.getY(i) / cursorRatioY;
             Platform.sendCursorPosition();
             return true; //mouse event handled successfully
         }
@@ -153,7 +153,7 @@ public class LauncherGLSurface extends View implements PlatformGrabListener, Gam
         // Keep cursor on screen if panning with IME inset
         if(LauncherPreferences.PREF_KEYBOARD_AUTOPANNING && MainActivity.mImeHeight > 0){
             int translationY = Tools.getTranslationFromCursorY(
-                    (int)((Platform.cursorY / getWindowHeight()) * getHeight()) + 100,
+                    (int) (Platform.cursorY * cursorRatioY + 100),
                     getHeight(),
                     MainActivity.mImeHeight,
                     0
@@ -209,8 +209,8 @@ public class LauncherGLSurface extends View implements PlatformGrabListener, Gam
 
         switch(event.getActionMasked()) {
             case MotionEvent.ACTION_HOVER_MOVE:
-                Platform.cursorX = event.getX(mouseCursorIndex) / getWidth();
-                Platform.cursorY = event.getY(mouseCursorIndex) / getHeight();
+                Platform.cursorX = event.getX(mouseCursorIndex) / cursorRatioX;
+                Platform.cursorY = event.getY(mouseCursorIndex) / cursorRatioY;
                 Platform.sendCursorPosition();
                 return true;
             case MotionEvent.ACTION_SCROLL:
@@ -414,5 +414,12 @@ public class LauncherGLSurface extends View implements PlatformGrabListener, Gam
     }
     public static float getWindowRate(){
         return windowRate;
+    }
+    public double getCursorRatioX(){
+        return cursorRatioX;
+    }
+
+    public double getCursorRatioY() {
+        return cursorRatioY;
     }
 }
