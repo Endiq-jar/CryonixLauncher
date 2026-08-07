@@ -481,9 +481,7 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
         }
         boolean handleEvent;
         if(!(handleEvent = launcherGLView.processKeyEvent(event))) {
-            if (event.getKeyCode() == KeyEvent.KEYCODE_BACK &&
-                    !touchCharInput.isEnabled() &&
-                    (event.getFlags() & KeyEvent.FLAG_VIRTUAL_HARD_KEY) != 0) {
+            if (event.getKeyCode() == KeyEvent.KEYCODE_BACK && !touchCharInput.isEnabled()) {
                 if(event.getAction() != KeyEvent.ACTION_UP) return true; // We eat it anyway
                 CallbackBridge.sendKeyPress(KeyEvent.KEYCODE_ESCAPE);
                 return true;
