@@ -86,23 +86,23 @@ public class SDLBackend implements PlatformBackend {
     }
 
     @Override
-    public void sendKeyEvent(int key, int state, int mods, char codepoint) {
+    public boolean sendKeyEvent(int key, int state, int mods, char codepoint) {
         if (state == 1) {
-            SDLActivity.onNativeKeyDown(key);
             if (codepoint != 0) SDLInputConnection.nativeCommitText(String.valueOf(codepoint), 0);
-        } else SDLActivity.onNativeKeyUp(key);
+            return SDLActivity.onNativeKeyDown(key);
+        } else return SDLActivity.onNativeKeyUp(key);
     }
 
     @Override
-    public void sendKeyEvent(int key, int state, int mods) {
-        if (state == 1) SDLActivity.onNativeKeyDown(key);
-        else SDLActivity.onNativeKeyUp(key);
+    public boolean sendKeyEvent(int key, int state, int mods) {
+        if (state == 1) return SDLActivity.onNativeKeyDown(key);
+        else return SDLActivity.onNativeKeyUp(key);
     }
 
     @Override
-    public void sendKeyEvent(int key, boolean state, int mods) {
-        if (state) SDLActivity.onNativeKeyDown(key);
-        else SDLActivity.onNativeKeyUp(key);
+    public boolean sendKeyEvent(int key, boolean state, int mods) {
+        if (state) return SDLActivity.onNativeKeyDown(key);
+        else return SDLActivity.onNativeKeyUp(key);
     }
 
     @Override

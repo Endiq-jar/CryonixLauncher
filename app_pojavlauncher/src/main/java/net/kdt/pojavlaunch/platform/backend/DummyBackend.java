@@ -34,18 +34,18 @@ public class DummyBackend implements PlatformBackend {
     }
 
     @Override
-    public void sendKeyEvent(int key, int state, int mods, char codepoint) {
-
+    public boolean sendKeyEvent(int key, int state, int mods, char codepoint) {
+        return true;
     }
 
     @Override
-    public void sendKeyEvent(int key, int state, int mods) {
-
+    public boolean sendKeyEvent(int key, int state, int mods) {
+        return true;
     }
 
     @Override
-    public void sendKeyEvent(int key, boolean state, int mods) {
-
+    public boolean sendKeyEvent(int key, boolean state, int mods) {
+        return true;
     }
 
     @Override

@@ -44,8 +44,9 @@ public interface PlatformBackend {
      * @param state     State (down/up)
      * @param mods      Modifier keys
      * @param codepoint Unicode symbol tied to the sent keycode
+     * @return True if succeeded, false if unknown/unsupported keycode
      */
-    void sendKeyEvent(int key, int state, int mods, char codepoint);
+    boolean sendKeyEvent(int key, int state, int mods, char codepoint);
 
     /**
      * Send keyboard key press event to an implementation
@@ -53,8 +54,9 @@ public interface PlatformBackend {
      * @param key   Android keycode to send
      * @param state State (down/up)
      * @param mods  Modifier keys
+     * @return True if succeeded, false if unknown/unsupported keycode
      */
-    void sendKeyEvent(int key, int state, int mods);
+    boolean sendKeyEvent(int key, int state, int mods);
 
     /**
      * Send keyboard key press event to an implementation
@@ -62,8 +64,9 @@ public interface PlatformBackend {
      * @param key   Android keycode to send
      * @param state State (down/up)
      * @param mods  Modifier keys
+     * @return True if succeeded, false if unknown/unsupported keycode
      */
-    void sendKeyEvent(int key, boolean state, int mods);
+    boolean sendKeyEvent(int key, boolean state, int mods);
 
     /**
      * Send mouse wheel/touchpad scroll event to an implementation

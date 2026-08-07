@@ -73,18 +73,18 @@ public class GLFWBackend implements PlatformBackend {
     }
 
     @Override
-    public void sendKeyEvent(int key, int state, int mods, char codepoint) {
-        GLFW.sendRawKeyEvent(key, state, mods, codepoint);
+    public boolean sendKeyEvent(int key, int state, int mods, char codepoint) {
+        return GLFW.sendRawKeyEvent(key, state, mods, codepoint);
     }
 
     @Override
-    public void sendKeyEvent(int key, int state, int mods) {
-        GLFW.sendRawKeyEvent(key, state, mods, (char) 0);
+    public boolean sendKeyEvent(int key, int state, int mods) {
+        return GLFW.sendRawKeyEvent(key, state, mods, (char) 0);
     }
 
     @Override
-    public void sendKeyEvent(int key, boolean state, int mods) {
-        GLFW.sendRawKeyEvent(key, state ? 1 : 0, mods, (char) 0);
+    public boolean sendKeyEvent(int key, boolean state, int mods) {
+        return GLFW.sendRawKeyEvent(key, state ? 1 : 0, mods, (char) 0);
     }
 
     @Override
