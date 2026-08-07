@@ -9,8 +9,8 @@ import net.kdt.pojavlaunch.platform.Platform;
 
 import git.artdeell.dnbootstrap.glfw.GLFW;
 
-/*
-Static provider for GLFW
+/**
+ * GLFW Platform implementation
  */
 public class GLFWBackend implements PlatformBackend {
     public GLFWBackend(){

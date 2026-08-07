@@ -13,6 +13,9 @@ import git.mojo.sdl.SDLActivity;
 import git.mojo.sdl.SDLControllerManager;
 import git.mojo.sdl.SDLInputConnection;
 
+/**
+ * SDL3 Platform implementation
+ */
 public class SDLBackend implements PlatformBackend{
 
     private static void handleGrabStateChange(boolean isGrabbing){
@@ -76,8 +79,8 @@ public class SDLBackend implements PlatformBackend{
 
 
     @Override
-    public void sendMouseEvent(int key, int state, int mods) {
-        SDLActivity.onNativeMouseButton(key, state, (float) Platform.cursorX, (float) Platform.cursorY, Platform.isGrabbing());
+    public void sendMouseEvent(int button, int state, int mods) {
+        SDLActivity.onNativeMouseButton(button, state, (float) Platform.cursorX, (float) Platform.cursorY, Platform.isGrabbing());
     }
 
     @Override

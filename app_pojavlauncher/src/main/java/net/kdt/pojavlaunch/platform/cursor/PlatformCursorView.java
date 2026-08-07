@@ -15,6 +15,9 @@ import net.kdt.pojavlaunch.platform.Platform;
 
 import git.artdeell.mojo.R;
 
+/**
+ * A view that draws the platform cursor on the screen
+ */
 public class PlatformCursorView extends View implements PlatformCursorImplementor {
     private Drawable cursorDrawable;
     private final Paint customCursorPaint = new Paint();

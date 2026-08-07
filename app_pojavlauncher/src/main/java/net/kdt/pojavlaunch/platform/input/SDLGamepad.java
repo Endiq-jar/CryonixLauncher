@@ -5,6 +5,10 @@ import android.view.MotionEvent;
 
 import git.mojo.sdl.SDLControllerManager;
 
+
+/**
+ * SDL Platform Gamepad implementation
+ */
 public class SDLGamepad implements PlatformGamepad {
     @Override
     public void sendKeyEvent(KeyEvent event) {

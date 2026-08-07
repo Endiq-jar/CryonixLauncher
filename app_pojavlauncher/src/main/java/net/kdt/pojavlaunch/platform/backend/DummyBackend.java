@@ -3,6 +3,9 @@ package net.kdt.pojavlaunch.platform.backend;
 import android.view.Surface;
 
 
+/**
+ * Null (dummy) Platform implementation. Use when none of other platforms are available
+ */
 public class DummyBackend implements PlatformBackend {
 
     @Override
@@ -26,7 +29,7 @@ public class DummyBackend implements PlatformBackend {
     }
 
     @Override
-    public void sendMouseEvent(int key, int state, int mods) {
+    public void sendMouseEvent(int button, int state, int mods) {
 
     }
 
