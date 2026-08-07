@@ -9,18 +9,21 @@ import android.view.MotionEvent;
 public interface PlatformGamepad {
     /**
      * Send gamepad key event directly
+     *
      * @param event Android KeyEvent
      */
     void sendKeyEvent(KeyEvent event);
 
     /**
      * Send gamepad motion event directly
+     *
      * @param event Android MotionEvent
      */
     void sendMotionEvent(MotionEvent event);
 
     /**
      * Whether the current gamepad implementation ready to consume events / override emulated input
+     *
      * @return override status
      */
     boolean shouldOverride();

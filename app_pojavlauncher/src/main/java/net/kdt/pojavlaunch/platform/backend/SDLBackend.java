@@ -9,17 +9,25 @@ import net.kdt.pojavlaunch.platform.Platform;
 
 import git.mojo.sdl.SDL;
 import git.mojo.sdl.SDLActivity;
-
 import git.mojo.sdl.SDLControllerManager;
 import git.mojo.sdl.SDLInputConnection;
 
 /**
  * SDL3 Platform implementation
  */
-public class SDLBackend implements PlatformBackend{
+public class SDLBackend implements PlatformBackend {
 
-    private static void handleGrabStateChange(boolean isGrabbing){
-        if(isGrabbing){
+    public SDLBackend() {
+        SDLActivity.setGrabListener(SDLBackend::handleGrabStateChange);
+        SDLActivity.setCursorCallback(cursor -> {
+            if (cursor != null)
+                Platform.setCursor(cursor.getBitmap(), cursor.getXhot(), cursor.getYhot());
+            else Platform.setCursor(null, 0, 0);
+        });
+    }
+
+    private static void handleGrabStateChange(boolean isGrabbing) {
+        if (isGrabbing) {
             // SDL really expects cursor to be at 0x0 position when relative mode (grabbing = true) is enabled
             // This caused weird jumps when gaining grab because Platform cursor position values contain stale non-zero values at that point.
             // Reset position to 0x0 when gaining grab state
@@ -28,13 +36,7 @@ public class SDLBackend implements PlatformBackend{
         }
         Platform.grabStateChanged(isGrabbing);
     }
-    public SDLBackend(){
-        SDLActivity.setGrabListener(SDLBackend::handleGrabStateChange);
-        SDLActivity.setCursorCallback(cursor -> {
-            if(cursor != null) Platform.setCursor(cursor.getBitmap(), cursor.getXhot(), cursor.getYhot());
-            else Platform.setCursor(null, 0, 0);
-        });
-    }
+
     public static void initialize(Activity activity) {
         // TODO: check what can be moved to the initialize point
         // we need to setup enough SDL for the game to not crash to initialize it later
@@ -46,7 +48,7 @@ public class SDLBackend implements PlatformBackend{
 
     @Override
     public void surfaceCreated(Surface surface) {
-        if(SDLActivity.getNativeSurface() != null) SDLActivity.onNativeSurfaceDestroyed();
+        if (SDLActivity.getNativeSurface() != null) SDLActivity.onNativeSurfaceDestroyed();
         SDLActivity.setNativeSurface(surface);
         SDLActivity.onNativeSurfaceCreated();
         this.surfaceUpdated(); // Update initial size
@@ -70,7 +72,7 @@ public class SDLBackend implements PlatformBackend{
     @Override
     public void sendMousePosition() {
         SDLActivity.onNativeMouse(0, MotionEvent.ACTION_MOVE, (float) Platform.cursorX, (float) Platform.cursorY, Platform.isGrabbing());
-        if(Platform.isGrabbing()){
+        if (Platform.isGrabbing()) {
             // SDL in relative mode expects these to be reset to 0 or it will freak out (classic:tm: way)
             Platform.cursorX = 0;
             Platform.cursorY = 0;
@@ -85,22 +87,21 @@ public class SDLBackend implements PlatformBackend{
 
     @Override
     public void sendKeyEvent(int key, int state, int mods, char codepoint) {
-        if(state == 1) {
+        if (state == 1) {
             SDLActivity.onNativeKeyDown(key);
-            if(codepoint != 0) SDLInputConnection.nativeCommitText(String.valueOf(codepoint), 0);
-        }
-        else SDLActivity.onNativeKeyUp(key);
+            if (codepoint != 0) SDLInputConnection.nativeCommitText(String.valueOf(codepoint), 0);
+        } else SDLActivity.onNativeKeyUp(key);
     }
 
     @Override
     public void sendKeyEvent(int key, int state, int mods) {
-        if(state == 1) SDLActivity.onNativeKeyDown(key);
+        if (state == 1) SDLActivity.onNativeKeyDown(key);
         else SDLActivity.onNativeKeyUp(key);
     }
 
     @Override
     public void sendKeyEvent(int key, boolean state, int mods) {
-        if(state) SDLActivity.onNativeKeyDown(key);
+        if (state) SDLActivity.onNativeKeyDown(key);
         else SDLActivity.onNativeKeyUp(key);
     }
 

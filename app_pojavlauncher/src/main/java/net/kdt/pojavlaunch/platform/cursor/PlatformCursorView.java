@@ -10,7 +10,6 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 
-import net.kdt.pojavlaunch.LauncherGLSurface;
 import net.kdt.pojavlaunch.platform.Platform;
 
 import git.artdeell.mojo.R;
@@ -19,8 +18,8 @@ import git.artdeell.mojo.R;
  * A view that draws the platform cursor on the screen
  */
 public class PlatformCursorView extends View implements PlatformCursorImplementor {
-    private Drawable cursorDrawable;
     private final Paint customCursorPaint = new Paint();
+    private final Drawable cursorDrawable;
     private boolean noDraw = false;
     private float mouseScale = 1f;
     private double ratioX, ratioY;
@@ -46,14 +45,14 @@ public class PlatformCursorView extends View implements PlatformCursorImplemento
 
     @Override
     protected void onDraw(@NonNull Canvas canvas) {
-        if(noDraw) return;
+        if (noDraw) return;
         // Scale coordinates back to the full unresized screen size
-        int dx = (int)(Platform.cursorX * ratioX);
-        int dy = (int)(Platform.cursorY * ratioY);
+        int dx = (int) (Platform.cursorX * ratioX);
+        int dy = (int) (Platform.cursorY * ratioY);
         canvas.translate(dx, dy);
         PlatformCursor cursor = Platform.getCursor();
         canvas.scale(mouseScale, mouseScale);
-        if(cursor == null) {
+        if (cursor == null) {
             cursorDrawable.draw(canvas);
         } else {
             canvas.drawBitmap(cursor.bitmap, -cursor.hotX, -cursor.hotY, customCursorPaint);
@@ -62,7 +61,7 @@ public class PlatformCursorView extends View implements PlatformCursorImplemento
 
     @Override
     public void onCursorPosition() {
-        if(!noDraw) post(this::invalidate);
+        if (!noDraw) post(this::invalidate);
     }
 
     @Override
@@ -82,7 +81,7 @@ public class PlatformCursorView extends View implements PlatformCursorImplemento
         invalidate();
     }
 
-    public void setCursorScale(float scale){
+    public void setCursorScale(float scale) {
         this.mouseScale = scale;
     }
 }

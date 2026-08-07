@@ -18,6 +18,7 @@ public interface PlatformCursorImplementor extends PlatformGrabListener {
 
     /**
      * Update screen ratio between screen/view size and game window size
+     *
      * @param ratioX X ratio
      * @param ratioY Y ratio
      */
