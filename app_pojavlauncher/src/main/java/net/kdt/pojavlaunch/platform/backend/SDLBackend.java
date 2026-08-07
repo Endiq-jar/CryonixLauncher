@@ -44,9 +44,11 @@ public class SDLBackend implements PlatformBackend{
 
     @Override
     public void surfaceCreated(Surface surface) {
+        if(SDLActivity.getNativeSurface() != null) SDLActivity.onNativeSurfaceDestroyed();
         SDLActivity.setNativeSurface(surface);
         SDLActivity.onNativeSurfaceCreated();
         this.surfaceUpdated(); // Update initial size
+        SDLActivity.onNativeSurfaceChanged();
     }
 
     @Override
@@ -56,7 +58,6 @@ public class SDLBackend implements PlatformBackend{
         float r = LauncherGLSurface.getWindowRate();
         SDLActivity.nativeSetScreenResolution(w, h, w, h, 1.0f, r);
         SDLActivity.onNativeResize();
-        SDLActivity.onNativeSurfaceChanged();
     }
 
     @Override
