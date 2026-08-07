@@ -273,7 +273,8 @@ public class LauncherGLSurface extends View implements PlatformGrabListener, Gam
 
         CallbackBridge.setModifiers(event);
         char codepoint = action == KeyEvent.ACTION_DOWN ? (char) event.getUnicodeChar(event.getMetaState()) : 0;
-        PLATFORM.sendKeyEvent(eventKeycode, action == KeyEvent.ACTION_DOWN ? 1 : 0, CallbackBridge.getCurrentMods(), codepoint);
+        if(PLATFORM.sendKeyEvent(eventKeycode, action == KeyEvent.ACTION_DOWN ? 1 : 0, CallbackBridge.getCurrentMods(), codepoint))
+            return true;
 
         // Some events will be generated an infinite number of times when no consumed
         return (event.getFlags() & KeyEvent.FLAG_FALLBACK) == KeyEvent.FLAG_FALLBACK;
