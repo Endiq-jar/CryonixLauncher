@@ -68,10 +68,6 @@ public class Platform {
         return isGrabbing;
     }
 
-    public static void setPendingSurface(Surface surface) {
-        mPendingSurface = surface;
-    }
-
     // Can be received from non-UI threads
     public static void grabStateChanged(boolean grabbing) {
         boolean wasGrabbing = isGrabbing;
@@ -135,6 +131,10 @@ public class Platform {
     }
     public static void addGrabListener(PlatformGrabListener pgl) {
         grabListeners.add(pgl);
+    }
+    public static void updateSurface(Surface surface){
+        mPendingSurface = surface;
+        PLATFORM.surfaceCreated(surface);
     }
 
     public static void setPlatformLibrary(PlatformBackend backend) {

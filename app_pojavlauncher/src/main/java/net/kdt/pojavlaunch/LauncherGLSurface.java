@@ -97,6 +97,7 @@ public class LauncherGLSurface extends View implements PlatformGrabListener, Gam
         super(context, attributeSet);
         setFocusable(true);
         Platform.setGamepadEnableHandler(this);
+        Platform.addGrabListener(this);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
@@ -365,8 +366,7 @@ public class LauncherGLSurface extends View implements PlatformGrabListener, Gam
 
     @Override
     public void onSurfaceAvailable(Surface surface) {
-        Platform.addGrabListener(this);
-        Platform.setPendingSurface(surface);
+        Platform.updateSurface(surface);
         if(mRefreshOnly) return;
         realStart();
         mRefreshOnly = true;
