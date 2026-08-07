@@ -15,4 +15,7 @@ public interface PlatformBackend {
     void sendScrollEvent(double x, double y);
     void sendBulkUnicodeEvent(String text, int mods);
     String backendName();
+
+    void setHovered(boolean hovered);
+    void setVisible(boolean visible);
 }

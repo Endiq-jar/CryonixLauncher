@@ -87,4 +87,14 @@ public class GLFWBackend implements PlatformBackend {
     public String backendName() {
         return "GLFW";
     }
+
+    @Override
+    public void setHovered(boolean hovered) {
+        GLFW.nativeSetWindowAttribs(GLFW.GLFW_HOVERED, hovered);
+    }
+
+    @Override
+    public void setVisible(boolean visible) {
+        GLFW.nativeSetWindowAttribs(GLFW.GLFW_VISIBLE, visible);
+    }
 }

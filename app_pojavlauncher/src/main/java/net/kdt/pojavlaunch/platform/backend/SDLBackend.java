@@ -1,7 +1,6 @@
 package net.kdt.pojavlaunch.platform.backend;
 
 import android.app.Activity;
-import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.Surface;
 
@@ -115,5 +114,15 @@ public class SDLBackend implements PlatformBackend{
     @Override
     public String backendName() {
         return "SDL";
+    }
+
+    @Override
+    public void setHovered(boolean hovered) {
+        SDLActivity.nativeFocusChanged(hovered);
+    }
+
+    @Override
+    public void setVisible(boolean visible) {
+        SDLActivity.nativeVisibilityChanged(visible);
     }
 }

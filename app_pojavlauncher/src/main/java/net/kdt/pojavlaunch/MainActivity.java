@@ -2,6 +2,7 @@ package net.kdt.pojavlaunch;
 
 
 import static net.kdt.pojavlaunch.Tools.dialogForceClose;
+import static net.kdt.pojavlaunch.platform.Platform.PLATFORM;
 import static net.kdt.pojavlaunch.prefs.LauncherPreferences.PREF_ENABLE_GYRO;
 import static net.kdt.pojavlaunch.prefs.LauncherPreferences.PREF_SUSTAINED_PERFORMANCE;
 import static net.kdt.pojavlaunch.prefs.LauncherPreferences.PREF_USE_ALTERNATE_SURFACE;
@@ -308,7 +309,7 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
         super.onResume();
         ContextExecutor.setActivity(this);
         if(PREF_ENABLE_GYRO) mGyroControl.enable();
-        //CallbackBridge.nativeSetWindowAttrib(LwjglGlfwKeycode.GLFW_HOVERED, 1);
+        PLATFORM.setHovered(true);
     }
 
     @Override
@@ -322,19 +323,19 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
         if(mQuickSettingSideDialog != null) {
             mQuickSettingSideDialog.cancel();
         }
-        //CallbackBridge.nativeSetWindowAttrib(LwjglGlfwKeycode.GLFW_HOVERED, 0);
+        PLATFORM.setHovered(false);
         super.onPause();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        //CallbackBridge.nativeSetWindowAttrib(LwjglGlfwKeycode.GLFW_VISIBLE, 1);
+        PLATFORM.setVisible(true);
     }
 
     @Override
     protected void onStop() {
-        //CallbackBridge.nativeSetWindowAttrib(LwjglGlfwKeycode.GLFW_VISIBLE, 0);
+        PLATFORM.setVisible(false);
         super.onStop();
     }
 
@@ -364,7 +365,7 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
     @Override
     protected void onPostResume() {
         super.onPostResume();
-        if(mLoadingScreen != null && !(Platform.PLATFORM instanceof DummyBackend)) hideLoadingScreen();
+        if(mLoadingScreen != null && !(PLATFORM instanceof DummyBackend)) hideLoadingScreen();
         if(launcherGLView != null)  // Useful when backing out of the app
             Tools.MAIN_HANDLER.postDelayed(() -> launcherGLView.refreshSize(), 500);
     }
@@ -506,7 +507,7 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
 
     public void hideLoadingScreen(){
         if(mLoadingScreen == null) return;
-        ((TextView) mLoadingScreen.findViewById(R.id.main_loading_screen_text)).setText(getString(R.string.loading_screen_booted, Platform.PLATFORM.backendName()));
+        ((TextView) mLoadingScreen.findViewById(R.id.main_loading_screen_text)).setText(getString(R.string.loading_screen_booted, PLATFORM.backendName()));
         mLoadingScreen.animate()
                 .alpha(0f)
                 .setDuration(300)

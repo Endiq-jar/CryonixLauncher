@@ -2,8 +2,6 @@ package net.kdt.pojavlaunch.platform.backend;
 
 import android.view.Surface;
 
-import net.kdt.pojavlaunch.platform.Platform;
-
 
 public class DummyBackend implements PlatformBackend {
 
@@ -60,5 +58,15 @@ public class DummyBackend implements PlatformBackend {
     @Override
     public String backendName() {
         return "You must not see this!";
+    }
+
+    @Override
+    public void setHovered(boolean hovered) {
+
+    }
+
+    @Override
+    public void setVisible(boolean visible) {
+
     }
 }
