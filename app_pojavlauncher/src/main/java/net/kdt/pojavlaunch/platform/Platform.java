@@ -2,11 +2,15 @@ package net.kdt.pojavlaunch.platform;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
+import android.view.InputDevice;
 import android.view.Surface;
+import android.view.View;
 
 import net.kdt.pojavlaunch.LauncherGLSurface;
 import net.kdt.pojavlaunch.MainActivity;
 import net.kdt.pojavlaunch.Tools;
+import net.kdt.pojavlaunch.customcontrols.gamepad.DefaultDataProvider;
+import net.kdt.pojavlaunch.customcontrols.gamepad.Gamepad;
 import net.kdt.pojavlaunch.lifecycle.ContextExecutor;
 import net.kdt.pojavlaunch.platform.backend.DummyBackend;
 import net.kdt.pojavlaunch.platform.backend.GLFWBackend;
@@ -17,13 +21,16 @@ import net.kdt.pojavlaunch.platform.cursor.PlatformCursor;
 import net.kdt.pojavlaunch.platform.cursor.PlatformCursorImplementor;
 import net.kdt.pojavlaunch.platform.input.PlatformGamepad;
 import net.kdt.pojavlaunch.platform.input.PlatformGrabListener;
-import net.kdt.pojavlaunch.platform.input.SDLGamepad;
+import net.kdt.pojavlaunch.platform.input.gamepad.GLFWGamepad;
+import net.kdt.pojavlaunch.platform.input.gamepad.GenericGamepad;
+import net.kdt.pojavlaunch.platform.input.gamepad.SDLGamepad;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import fr.spse.gamepad_remapper.RemapperManager;
+import fr.spse.gamepad_remapper.RemapperView;
 import git.artdeell.dnbootstrap.glfw.GLFW;
-import git.artdeell.dnbootstrap.glfw.GamepadEnableHandler;
 import git.mojo.sdl.SDLActivity;
 import git.mojo.sdl.SDLControllerManager;
 
@@ -42,15 +49,19 @@ public class Platform {
     private static Surface mPendingSurface;
     private static PlatformGamepad mPlatformGamepad = null;
     private static PlatformCursor mPlatformCursor = null;
-    private static GamepadEnableHandler mGamepadEnabler;
     private static AndroidClipboard mClipboard;
+    private static View mHostView;
+    private static RemapperManager mInputManager;
 
     /**
      * Initialize Platform, set platform implementations' init callbacks and fire early initializers
      *
-     * @param activity activity to bind to
+     * @param activity an activity to bind to
+     * @param view a host view used for input handling
      */
-    public static void initialize(Activity activity) {
+    public static void initialize(Activity activity, View view) {
+        Platform.mHostView = view;
+        Platform.mInputManager = createRemapperManager(view);
         mClipboard = new AndroidClipboard(activity.getApplicationContext());
         GLFW.setInitCallback(() -> onInit(new GLFWBackend()));
         SDLActivity.setInitCallback(() -> onInit(new SDLBackend()));
@@ -59,7 +70,9 @@ public class Platform {
         // SDL can handle gamepads on its own, so route all events through it
         // if SDL was detected of course (the check is based on detectDevices)
         // Vanilla SDL client shouldn't touch input system and thus cause emulated input to break
-        SDLControllerManager.setEnabledCallback(() -> mPlatformGamepad = new SDLGamepad());
+        SDLControllerManager.setEnabledCallback(() -> setPlatformGamepad(new SDLGamepad()));
+        // GLFW also has equivalent "onDirectGamepadEnable". Hook it up
+        GLFW.setGamepadEnableHandler(() -> setPlatformGamepad(new GLFWGamepad(view.getContext(), mInputManager)));
         SDLBackend.initialize(activity);
     }
 
@@ -145,23 +158,20 @@ public class Platform {
         mCursorImplementor = implementor;
     }
 
-    /**
-     * Get GLFW gamepad enable handler
-     *
-     * @return gamepad enable handler
-     */
-    public static GamepadEnableHandler getGamepadEnableHandler() {
-        return mGamepadEnabler;
+    private static void setPlatformGamepad(PlatformGamepad gamepad){
+        if(mPlatformGamepad != null)
+            mPlatformGamepad.onDestroy();
+        mPlatformGamepad = gamepad;
     }
 
     /**
-     * Set GLFW gamepad handler.
-     * TODO: Make GLFW gamepad handling same as SDL
-     *
-     * @param handler gamepad enable handler
+     * Create a generic gamepad implementation
+     * @param device Input device to accept events from
+     * @param touchpadView A view representing on-screen "trackpad"
      */
-    public static void setGamepadEnableHandler(GamepadEnableHandler handler) {
-        mGamepadEnabler = handler;
+    public static void createGenericGamepad(InputDevice device, View touchpadView){
+        Gamepad gamepad = new Gamepad(device, DefaultDataProvider.INSTANCE, touchpadView);
+        setPlatformGamepad(new GenericGamepad(mHostView.getContext(), mInputManager, gamepad));
     }
 
     /**
@@ -232,5 +242,22 @@ public class Platform {
         // To be picked by platform library
         if (mPendingSurface != null)
             PLATFORM.surfaceCreated(mPendingSurface);
+    }
+
+    private static RemapperManager createRemapperManager(View view){
+        return new RemapperManager(view.getContext(), new RemapperView.Builder(null)
+                .remapA(true)
+                .remapB(true)
+                .remapX(true)
+                .remapY(true)
+                .remapLeftJoystick(true)
+                .remapRightJoystick(true)
+                .remapStart(true)
+                .remapSelect(true)
+                .remapLeftShoulder(true)
+                .remapRightShoulder(true)
+                .remapLeftTrigger(true)
+                .remapRightTrigger(true)
+                .remapDpad(true));
     }
 }

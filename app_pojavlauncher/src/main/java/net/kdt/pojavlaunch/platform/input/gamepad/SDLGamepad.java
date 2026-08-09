@@ -1,13 +1,15 @@
-package net.kdt.pojavlaunch.platform.input;
+package net.kdt.pojavlaunch.platform.input.gamepad;
 
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+
+import net.kdt.pojavlaunch.platform.input.PlatformGamepad;
 
 import git.mojo.sdl.SDLControllerManager;
 
 
 /**
- * SDL Platform Gamepad implementation
+ * SDL3 Gamepad implementation
  */
 public class SDLGamepad implements PlatformGamepad {
     @Override
@@ -24,7 +26,7 @@ public class SDLGamepad implements PlatformGamepad {
     }
 
     @Override
-    public boolean shouldOverride() {
-        return SDLControllerManager.isEnabled();
+    public void onDestroy() {
+
     }
 }

@@ -22,9 +22,7 @@ public interface PlatformGamepad {
     void sendMotionEvent(MotionEvent event);
 
     /**
-     * Whether the current gamepad implementation ready to consume events / override emulated input
-     *
-     * @return override status
+     * Destroy gamepad instance
      */
-    boolean shouldOverride();
+    void onDestroy();
 }

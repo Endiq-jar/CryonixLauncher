@@ -23,7 +23,6 @@ import android.view.ViewGroup;
 import androidx.annotation.RequiresApi;
 
 import net.kdt.pojavlaunch.customcontrols.ControlLayout;
-import net.kdt.pojavlaunch.customcontrols.gamepad.DefaultDataProvider;
 import net.kdt.pojavlaunch.customcontrols.gamepad.Gamepad;
 import net.kdt.pojavlaunch.customcontrols.mouse.AndroidPointerCapture;
 import net.kdt.pojavlaunch.customcontrols.mouse.InGUIEventProcessor;
@@ -38,10 +37,6 @@ import net.kdt.pojavlaunch.render.SurfaceViewSurfaceProvider;
 import net.kdt.pojavlaunch.render.TextureViewSurfaceProvider;
 import net.kdt.pojavlaunch.utils.MCOptionUtils;
 
-import fr.spse.gamepad_remapper.GamepadHandler;
-import fr.spse.gamepad_remapper.RemapperManager;
-import fr.spse.gamepad_remapper.RemapperView;
-import git.artdeell.dnbootstrap.glfw.GamepadEnableHandler;
 import git.artdeell.mojoexec.MojoExec;
 
 import static net.kdt.pojavlaunch.platform.Platform.PLATFORM;
@@ -49,25 +44,7 @@ import static net.kdt.pojavlaunch.platform.Platform.PLATFORM;
 /**
  * Class dealing with showing minecraft surface and taking inputs to dispatch them to minecraft
  */
-public class LauncherGLSurface extends View implements PlatformGrabListener, GamepadEnableHandler, SurfaceProvider.SurfaceCallback {
-    /* Gamepad object for gamepad inputs, instantiated on need */
-    private GamepadHandler mGamepadHandler;
-    /* The RemapperView.Builder object allows you to set which buttons to remap */
-    private final RemapperManager mInputManager = new RemapperManager(getContext(), new RemapperView.Builder(null)
-            .remapA(true)
-            .remapB(true)
-            .remapX(true)
-            .remapY(true)
-
-            .remapLeftJoystick(true)
-            .remapRightJoystick(true)
-            .remapStart(true)
-            .remapSelect(true)
-            .remapLeftShoulder(true)
-            .remapRightShoulder(true)
-            .remapLeftTrigger(true)
-            .remapRightTrigger(true)
-            .remapDpad(true));
+public class LauncherGLSurface extends View implements PlatformGrabListener, SurfaceProvider.SurfaceCallback {
 
     /* Sensitivity, adjusted according to screen size */
     private final double mSensitivityFactor = (1.4 * (1080f/ Tools.getDisplayMetrics((Activity) getContext()).heightPixels));
@@ -96,7 +73,6 @@ public class LauncherGLSurface extends View implements PlatformGrabListener, Gam
     public LauncherGLSurface(Context context, AttributeSet attributeSet) {
         super(context, attributeSet);
         setFocusable(true);
-        Platform.setGamepadEnableHandler(this);
         Platform.addGrabListener(this);
     }
 
@@ -173,11 +149,6 @@ public class LauncherGLSurface extends View implements PlatformGrabListener, Gam
         return ret;
     }
 
-    private void createGamepad(InputDevice inputDevice) {
-        if(Platform.getPlatformGamepad() == null || Platform.getPlatformGamepad().shouldOverride())
-            mGamepadHandler = new Gamepad(inputDevice, DefaultDataProvider.INSTANCE, mTouchpad);
-    }
-
     /**
      * The event for mouse/joystick movements
      */
@@ -187,12 +158,9 @@ public class LauncherGLSurface extends View implements PlatformGrabListener, Gam
         int mouseCursorIndex = -1;
 
         if(Gamepad.isGamepadEvent(event)){
-            if(Platform.getPlatformGamepad() != null && Platform.getPlatformGamepad().shouldOverride()){
-                Platform.getPlatformGamepad().sendMotionEvent(event);
-                return true;
-            }
-            if(mGamepadHandler == null) createGamepad(event.getDevice());
-            mInputManager.handleMotionEventInput(getContext(), event, mGamepadHandler);
+            if(Platform.getPlatformGamepad() == null)
+                Platform.createGenericGamepad(event.getDevice(), mTouchpad);
+            Platform.getPlatformGamepad().sendMotionEvent(event);
             return true;
         }
 
@@ -261,13 +229,9 @@ public class LauncherGLSurface extends View implements PlatformGrabListener, Gam
         }
 
         if(Gamepad.isGamepadEvent(event)){
-            if(Platform.getPlatformGamepad() != null && Platform.getPlatformGamepad().shouldOverride()){
-                Platform.getPlatformGamepad().sendKeyEvent(event);
-                return true;
-            }
-            if(mGamepadHandler == null) createGamepad(event.getDevice());
-
-            mInputManager.handleKeyEventInput(getContext(), event, mGamepadHandler);
+            if(Platform.getPlatformGamepad() == null)
+                Platform.createGenericGamepad(event.getDevice(), mTouchpad);
+            Platform.getPlatformGamepad().sendKeyEvent(event);
             return true;
         }
 
@@ -383,17 +347,6 @@ public class LauncherGLSurface extends View implements PlatformGrabListener, Gam
     public void onSurfaceDestroyed() {
         if(PLATFORM != null)
             PLATFORM.surfaceDestroyed();
-    }
-
-    @Override
-    public void onEnableGamepad() {
-        post(()->{
-            if(mGamepadHandler != null && mGamepadHandler instanceof Gamepad) {
-                ((Gamepad)mGamepadHandler).removeSelf();
-            }
-            // Force gamepad recreation on next event
-            mGamepadHandler = null;
-        });
     }
 
     /** A small interface called when the listener is ready for the first time */
