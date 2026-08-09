@@ -208,7 +208,7 @@ public class Platform {
      * Prefer using this over {@link PlatformBackend#sendMousePosition()}
      */
     public static void sendCursorPosition() {
-        mCursorImplementor.onCursorPosition();
+        if(mCursorImplementor != null) mCursorImplementor.onCursorPosition();
         if (!isGrabbing) clampCursorPosition();
         PLATFORM.sendMousePosition();
     }
