@@ -1,4 +1,4 @@
-package net.kdt.pojavlaunch.platform.clipboard;
+package net.kdt.pojavlaunch.game.platform.clipboard;
 
 import android.content.ClipData;
 import android.content.ClipboardManager;

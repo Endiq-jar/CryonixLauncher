@@ -1,9 +1,9 @@
-package net.kdt.pojavlaunch.platform.input.gamepad;
+package net.kdt.pojavlaunch.game.platform.input.gamepad;
 
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
-import net.kdt.pojavlaunch.platform.input.PlatformGamepad;
+import net.kdt.pojavlaunch.game.platform.input.PlatformGamepad;
 
 import git.mojo.sdl.SDLControllerManager;
 

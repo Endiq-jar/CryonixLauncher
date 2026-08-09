@@ -1,4 +1,4 @@
-package net.kdt.pojavlaunch.platform.input;
+package net.kdt.pojavlaunch.game.platform.input;
 
 /**
  * Platform grab change listener. Accepts grab and ungrab events

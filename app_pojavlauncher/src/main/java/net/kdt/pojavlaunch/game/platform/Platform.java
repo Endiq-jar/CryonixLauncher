@@ -1,4 +1,4 @@
-package net.kdt.pojavlaunch.platform;
+package net.kdt.pojavlaunch.game.platform;
 
 import android.app.Activity;
 import android.graphics.Bitmap;
@@ -6,24 +6,24 @@ import android.view.InputDevice;
 import android.view.Surface;
 import android.view.View;
 
-import net.kdt.pojavlaunch.LauncherGLSurface;
-import net.kdt.pojavlaunch.MainActivity;
+import net.kdt.pojavlaunch.game.GameView;
+import net.kdt.pojavlaunch.game.GameActivity;
 import net.kdt.pojavlaunch.Tools;
 import net.kdt.pojavlaunch.customcontrols.gamepad.DefaultDataProvider;
 import net.kdt.pojavlaunch.customcontrols.gamepad.Gamepad;
 import net.kdt.pojavlaunch.lifecycle.ContextExecutor;
-import net.kdt.pojavlaunch.platform.backend.DummyBackend;
-import net.kdt.pojavlaunch.platform.backend.GLFWBackend;
-import net.kdt.pojavlaunch.platform.backend.PlatformBackend;
-import net.kdt.pojavlaunch.platform.backend.SDLBackend;
-import net.kdt.pojavlaunch.platform.clipboard.AndroidClipboard;
-import net.kdt.pojavlaunch.platform.cursor.PlatformCursor;
-import net.kdt.pojavlaunch.platform.cursor.PlatformCursorImplementor;
-import net.kdt.pojavlaunch.platform.input.PlatformGamepad;
-import net.kdt.pojavlaunch.platform.input.PlatformGrabListener;
-import net.kdt.pojavlaunch.platform.input.gamepad.GLFWGamepad;
-import net.kdt.pojavlaunch.platform.input.gamepad.GenericGamepad;
-import net.kdt.pojavlaunch.platform.input.gamepad.SDLGamepad;
+import net.kdt.pojavlaunch.game.platform.backend.DummyBackend;
+import net.kdt.pojavlaunch.game.platform.backend.GLFWBackend;
+import net.kdt.pojavlaunch.game.platform.backend.PlatformBackend;
+import net.kdt.pojavlaunch.game.platform.backend.SDLBackend;
+import net.kdt.pojavlaunch.game.platform.clipboard.AndroidClipboard;
+import net.kdt.pojavlaunch.game.platform.cursor.PlatformCursor;
+import net.kdt.pojavlaunch.game.platform.cursor.PlatformCursorImplementor;
+import net.kdt.pojavlaunch.game.platform.input.PlatformGamepad;
+import net.kdt.pojavlaunch.game.platform.input.PlatformGrabListener;
+import net.kdt.pojavlaunch.game.platform.input.gamepad.GLFWGamepad;
+import net.kdt.pojavlaunch.game.platform.input.gamepad.GenericGamepad;
+import net.kdt.pojavlaunch.game.platform.input.gamepad.SDLGamepad;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -80,7 +80,7 @@ public class Platform {
         // We probably already initialized at this point. Don't try to initialize again
         if (!(PLATFORM instanceof DummyBackend)) return;
         Platform.setPlatformLibrary(impl);
-        ContextExecutor.executeActivity(activity -> ((MainActivity) activity).hideLoadingScreen());
+        ContextExecutor.executeActivity(activity -> ((GameActivity) activity).hideLoadingScreen());
         resetCursorPosition();
     }
 
@@ -191,16 +191,16 @@ public class Platform {
      * Clamp cursor position on the screen. Prevents the cursor from moving outside the game window
      */
     public static void clampCursorPosition() {
-        cursorX = Math.clamp(cursorX, 0, LauncherGLSurface.getWindowWidth());
-        cursorY = Math.clamp(cursorY, 0f, LauncherGLSurface.getWindowHeight());
+        cursorX = Math.clamp(cursorX, 0, GameView.getWindowWidth());
+        cursorY = Math.clamp(cursorY, 0f, GameView.getWindowHeight());
     }
 
     /**
      * Reset current cursor position and set it to the center of a window
      */
     public static void resetCursorPosition() {
-        cursorX = (double) LauncherGLSurface.getWindowWidth() / 2;
-        cursorY = (double) LauncherGLSurface.getWindowHeight() / 2;
+        cursorX = (double) GameView.getWindowWidth() / 2;
+        cursorY = (double) GameView.getWindowHeight() / 2;
     }
 
     /**

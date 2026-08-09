@@ -1,8 +1,8 @@
-package net.kdt.pojavlaunch;
+package net.kdt.pojavlaunch.game;
 
 
 import static net.kdt.pojavlaunch.Tools.dialogForceClose;
-import static net.kdt.pojavlaunch.platform.Platform.PLATFORM;
+import static net.kdt.pojavlaunch.game.platform.Platform.PLATFORM;
 import static net.kdt.pojavlaunch.prefs.LauncherPreferences.PREF_ENABLE_GYRO;
 import static net.kdt.pojavlaunch.prefs.LauncherPreferences.PREF_SUSTAINED_PERFORMANCE;
 import static net.kdt.pojavlaunch.prefs.LauncherPreferences.PREF_USE_ALTERNATE_SURFACE;
@@ -43,6 +43,11 @@ import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.kdt.LoggerView;
 
+import net.kdt.pojavlaunch.BaseActivity;
+import net.kdt.pojavlaunch.CallbackBridge;
+import net.kdt.pojavlaunch.EfficientAndroidLWJGLKeycode;
+import net.kdt.pojavlaunch.Logger;
+import net.kdt.pojavlaunch.Tools;
 import net.kdt.pojavlaunch.authenticator.accounts.Accounts;
 import net.kdt.pojavlaunch.customcontrols.ControlButtonMenuListener;
 import net.kdt.pojavlaunch.customcontrols.ControlData;
@@ -58,9 +63,8 @@ import net.kdt.pojavlaunch.customcontrols.mouse.HotbarView;
 import net.kdt.pojavlaunch.instances.Instance;
 import net.kdt.pojavlaunch.instances.Instances;
 import net.kdt.pojavlaunch.lifecycle.ContextExecutor;
-import net.kdt.pojavlaunch.platform.Platform;
-import net.kdt.pojavlaunch.platform.backend.DummyBackend;
-import net.kdt.pojavlaunch.platform.cursor.PlatformCursorView;
+import net.kdt.pojavlaunch.game.platform.Platform;
+import net.kdt.pojavlaunch.game.platform.backend.DummyBackend;
 import net.kdt.pojavlaunch.prefs.LauncherPreferences;
 import net.kdt.pojavlaunch.prefs.QuickSettingSideDialog;
 import net.kdt.pojavlaunch.services.GameService;
@@ -78,14 +82,13 @@ import java.util.Objects;
 
 import git.artdeell.mojo.R;
 
-public class MainActivity extends BaseActivity implements ControlButtonMenuListener, EditorExitable, ServiceConnection {
+public class GameActivity extends BaseActivity implements ControlButtonMenuListener, EditorExitable, ServiceConnection {
     public static final String INTENT_LAUNCH_VERSION = "intent_version";
     public static final String INTENT_LAUNCH_CLASSPATH = "intent_classpath";
 
     public static TouchCharInput touchCharInput;
-    private LauncherGLSurface launcherGLView;
-    private static WeakReference<PlatformCursorView> weakCursor;
-    private PlatformCursorView cursor;
+    private GameView launcherGLView;
+    private static WeakReference<GameCursorView> weakCursor;
     private LoggerView loggerView;
     private DrawerLayout drawerLayout;
     private ListView navDrawer;
@@ -150,7 +153,7 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
                 return insets;
             ViewPropertyAnimator animSurface = launcherGLView.mSurface.animate()
                     .setDuration(100);
-            ViewPropertyAnimator animCursor = cursor.animate()
+            ViewPropertyAnimator animCursor = launcherGLView.mCursorView.animate()
                     .setDuration(100);
             if(!insets.isVisible(WindowInsetsCompat.Type.ime())){
                 animSurface.translationY(0).start();
@@ -212,12 +215,12 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
     protected void initLayout(int resId) {
         setContentView(resId);
         bindValues();
-        Platform.setCursorImplementor(cursor);
         mControlLayout.setMenuListener(this);
 
         mDrawerPullButton.setOnClickListener(v -> onClickedMenu());
         drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
-        cursor.setCursorScale(LauncherPreferences.PREF_MOUSESCALE);
+        launcherGLView.mCursorView.setCursorScale(LauncherPreferences.PREF_MOUSESCALE);
+        weakCursor = new WeakReference<>(launcherGLView.mCursorView);
 
         try {
             File latestLogFile = new File(Tools.DIR_GAME_HOME, "latestlog.txt");
@@ -238,7 +241,7 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
                     android.R.layout.simple_list_item_1, getResources().getStringArray(R.array.menu_ingame));
             gameActionClickListener = (parent, view, position, id) -> {
                 switch(position) {
-                     case 0: dialogForceClose(MainActivity.this); break;
+                     case 0: dialogForceClose(GameActivity.this); break;
                      case 1: openLogOutput(); break;
                      case 2: dialogSendCustomKey(); break;
                      case 3: openQuickSettings(); break;
@@ -252,7 +255,7 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
 
             launcherGLView.setSurfaceReadyListener(() -> {
                 try {
-                    Tools.runOnUiThread(() -> { if(PREF_VIRTUAL_MOUSE_START) cursor.setVisibility(View.VISIBLE); });
+                    Tools.runOnUiThread(() -> { if(PREF_VIRTUAL_MOUSE_START) launcherGLView.mCursorView.setVisibility(View.VISIBLE); });
                     runCraft(version, classpath);
                 }catch (Throwable e){
                     Tools.showErrorRemote(e);
@@ -294,8 +297,6 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
     private void bindValues(){
         mControlLayout = findViewById(R.id.main_control_layout);
         launcherGLView = findViewById(R.id.main_game_render_view);
-        cursor = findViewById(R.id.main_touchpad);
-        weakCursor = new WeakReference<>(cursor);
         drawerLayout = findViewById(R.id.main_drawer_options);
         navDrawer = findViewById(R.id.main_navigation_view);
         loggerView = findViewById(R.id.mainLoggerView);
@@ -453,7 +454,7 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
     public static void toggleMouse(Context ctx) {
         // Avoid going through the JNI each time.
         if (Platform.isGrabbing()) return;
-        PlatformCursorView cursorView = Tools.getWeakReference(weakCursor);
+        GameCursorView cursorView = Tools.getWeakReference(weakCursor);
         if(cursorView == null) return;
         int toastString = 0;
         switch (cursorView.getVisibility()) {
@@ -494,13 +495,13 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
     public static void switchKeyboardState(boolean panning) {
         if(touchCharInput != null) {
             touchCharInput.switchKeyboardState();
-            MainActivity.mForcedPanningHeight = panning ? -1 : 0;
+            GameActivity.mForcedPanningHeight = panning ? -1 : 0;
         }
     }
     public static void toggleKeyboardState(boolean state, int panningHeight) {
         if(touchCharInput != null) {
             touchCharInput.setKeyboardState(state);
-            MainActivity.mForcedPanningHeight = panningHeight;
+            GameActivity.mForcedPanningHeight = panningHeight;
         }
     }
 
@@ -544,7 +545,7 @@ public class MainActivity extends BaseActivity implements ControlButtonMenuListe
     public void onServiceConnected(ComponentName name, IBinder service) {
         GameService.LocalBinder localBinder = (GameService.LocalBinder) service;
         mServiceBinder = localBinder;
-        launcherGLView.start(localBinder.isActive, cursor);
+        launcherGLView.start(localBinder.isActive);
         localBinder.isActive = true;
     }
 

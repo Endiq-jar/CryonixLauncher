@@ -1,7 +1,5 @@
 package net.kdt.pojavlaunch.customcontrols.mouse;
 
-import static net.kdt.pojavlaunch.platform.Platform.PLATFORM;
-
 import android.app.Activity;
 import android.content.Context;
 import android.hardware.Sensor;
@@ -12,9 +10,9 @@ import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.WindowManager;
 
-import net.kdt.pojavlaunch.LauncherGLSurface;
-import net.kdt.pojavlaunch.platform.input.PlatformGrabListener;
-import net.kdt.pojavlaunch.platform.Platform;
+import net.kdt.pojavlaunch.game.GameView;
+import net.kdt.pojavlaunch.game.platform.input.PlatformGrabListener;
+import net.kdt.pojavlaunch.game.platform.Platform;
 import net.kdt.pojavlaunch.prefs.LauncherPreferences;
 
 import java.util.Arrays;
@@ -107,8 +105,8 @@ public class GyroControl implements SensorEventListener, PlatformGrabListener {
         float absX = Math.abs(mStoredX);
         float absY = Math.abs(mStoredY);
 
-        int width = LauncherGLSurface.getWindowWidth();
-        int height = LauncherGLSurface.getWindowHeight();
+        int width = GameView.getWindowWidth();
+        int height = GameView.getWindowHeight();
 
         if(absX + absY > MULTI_AXIS_LOW_PASS_THRESHOLD) {
             Platform.cursorX -= ((mSwapXY ? mStoredY : mStoredX) * xFactor) * width;

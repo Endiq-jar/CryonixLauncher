@@ -1,4 +1,4 @@
-package net.kdt.pojavlaunch.platform.input;
+package net.kdt.pojavlaunch.game.platform.input;
 
 import android.view.KeyEvent;
 import android.view.MotionEvent;

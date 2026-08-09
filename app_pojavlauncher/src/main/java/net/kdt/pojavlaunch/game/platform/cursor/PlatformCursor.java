@@ -1,4 +1,4 @@
-package net.kdt.pojavlaunch.platform.cursor;
+package net.kdt.pojavlaunch.game.platform.cursor;
 
 import android.graphics.Bitmap;
 

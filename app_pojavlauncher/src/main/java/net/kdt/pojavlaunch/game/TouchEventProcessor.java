@@ -1,29 +1,20 @@
-package net.kdt.pojavlaunch.customcontrols.mouse;
+package net.kdt.pojavlaunch.game;
 
-import static net.kdt.pojavlaunch.platform.Platform.PLATFORM;
-
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
-import net.kdt.pojavlaunch.LauncherGLSurface;
-import net.kdt.pojavlaunch.platform.Platform;
+import net.kdt.pojavlaunch.game.platform.Platform;
 import net.kdt.pojavlaunch.prefs.LauncherPreferences;
 
 public abstract class TouchEventProcessor {
-    private final View mHostView;
-    private double ratioX, ratioY;
-    public TouchEventProcessor(View hostView) {
+    private final GameView mHostView;
+    public TouchEventProcessor(GameView hostView) {
         mHostView = hostView;
-    }
-    public void updateCursorRatio(double ratioX, double ratioY){
-        this.ratioX = ratioX;
-        this.ratioY = ratioY;
     }
 
     protected void sendTouchCoordinates(float x, float y) {
-        Platform.cursorX = x / ratioX;
-        Platform.cursorY = y / ratioY;
+        Platform.cursorX = x / mHostView.cursorRatioX;
+        Platform.cursorY = y / mHostView.cursorRatioY;
         Platform.sendCursorPosition();
     }
 

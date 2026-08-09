@@ -1,11 +1,11 @@
-package net.kdt.pojavlaunch.platform.backend;
+package net.kdt.pojavlaunch.game.platform.backend;
 
 
 import android.view.MotionEvent;
 import android.view.Surface;
 
 import net.kdt.pojavlaunch.LwjglGlfwKeycode;
-import net.kdt.pojavlaunch.platform.Platform;
+import net.kdt.pojavlaunch.game.platform.Platform;
 
 import git.artdeell.dnbootstrap.glfw.GLFW;
 

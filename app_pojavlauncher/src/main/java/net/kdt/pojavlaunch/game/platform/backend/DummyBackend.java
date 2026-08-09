@@ -1,4 +1,4 @@
-package net.kdt.pojavlaunch.platform.backend;
+package net.kdt.pojavlaunch.game.platform.backend;
 
 import android.view.Surface;
 
