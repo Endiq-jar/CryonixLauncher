@@ -166,6 +166,7 @@ public class Platform {
 
     /**
      * Create a generic gamepad implementation
+     *
      * @param device Input device to accept events from
      * @param touchpadView A view representing on-screen "trackpad"
      */
@@ -204,12 +205,23 @@ public class Platform {
     }
 
     /**
+     * Floor current cursor position to stop anticheats from triggering for no reason
+     *
+     */
+    public static void floorCursorPosition(){
+        cursorX = Math.floor(cursorX);
+        cursorY = Math.floor(cursorY);
+    }
+
+    /**
      * Send current cursor position to the implementation after clamping and updating its view position.
      * Prefer using this over {@link PlatformBackend#sendMousePosition()}
+     *
      */
     public static void sendCursorPosition() {
         if(mCursorImplementor != null) mCursorImplementor.onCursorPosition();
         if (!isGrabbing) clampCursorPosition();
+        else floorCursorPosition();
         PLATFORM.sendMousePosition();
     }
 
