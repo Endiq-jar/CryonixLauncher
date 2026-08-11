@@ -1,15 +1,21 @@
-package net.kdt.pojavlaunch.platform.input;
+package net.kdt.pojavlaunch.game.platform.input.gamepad;
 
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 
+import net.kdt.pojavlaunch.game.platform.input.PlatformGamepad;
+
 import git.mojo.sdl.SDLControllerManager;
 
+
+/**
+ * SDL3 Gamepad implementation
+ */
 public class SDLGamepad implements PlatformGamepad {
     @Override
     public void sendKeyEvent(KeyEvent event) {
-        if(event.getAction() == KeyEvent.ACTION_DOWN)
-            SDLControllerManager.onNativePadDown(event.getDeviceId(),event.getKeyCode(), event.getScanCode());
+        if (event.getAction() == KeyEvent.ACTION_DOWN)
+            SDLControllerManager.onNativePadDown(event.getDeviceId(), event.getKeyCode(), event.getScanCode());
         else
             SDLControllerManager.onNativePadUp(event.getDeviceId(), event.getKeyCode(), event.getScanCode());
     }
@@ -20,7 +26,7 @@ public class SDLGamepad implements PlatformGamepad {
     }
 
     @Override
-    public boolean shouldOverride() {
-        return SDLControllerManager.isEnabled();
+    public void onDestroy() {
+
     }
 }

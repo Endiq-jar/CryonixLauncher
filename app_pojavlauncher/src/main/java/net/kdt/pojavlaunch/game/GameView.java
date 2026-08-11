@@ -1,7 +1,7 @@
-package net.kdt.pojavlaunch;
+package net.kdt.pojavlaunch.game;
 
 import static net.kdt.pojavlaunch.CallbackBridge.windowRate;
-import static net.kdt.pojavlaunch.MainActivity.touchCharInput;
+import static net.kdt.pojavlaunch.game.GameActivity.touchCharInput;
 import static net.kdt.pojavlaunch.utils.MCOptionUtils.getMcScale;
 import static net.kdt.pojavlaunch.CallbackBridge.sendMouseButton;
 import static net.kdt.pojavlaunch.CallbackBridge.windowHeight;
@@ -19,18 +19,17 @@ import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 
 import androidx.annotation.RequiresApi;
 
+import net.kdt.pojavlaunch.CallbackBridge;
+import net.kdt.pojavlaunch.Tools;
 import net.kdt.pojavlaunch.customcontrols.ControlLayout;
-import net.kdt.pojavlaunch.customcontrols.gamepad.DefaultDataProvider;
 import net.kdt.pojavlaunch.customcontrols.gamepad.Gamepad;
 import net.kdt.pojavlaunch.customcontrols.mouse.AndroidPointerCapture;
-import net.kdt.pojavlaunch.customcontrols.mouse.InGUIEventProcessor;
-import net.kdt.pojavlaunch.customcontrols.mouse.InGameEventProcessor;
-import net.kdt.pojavlaunch.customcontrols.mouse.TouchEventProcessor;
-import net.kdt.pojavlaunch.platform.input.PlatformGrabListener;
-import net.kdt.pojavlaunch.platform.Platform;
+import net.kdt.pojavlaunch.game.platform.input.PlatformGrabListener;
+import net.kdt.pojavlaunch.game.platform.Platform;
 
 import net.kdt.pojavlaunch.prefs.LauncherPreferences;
 import net.kdt.pojavlaunch.render.SurfaceProvider;
@@ -38,36 +37,17 @@ import net.kdt.pojavlaunch.render.SurfaceViewSurfaceProvider;
 import net.kdt.pojavlaunch.render.TextureViewSurfaceProvider;
 import net.kdt.pojavlaunch.utils.MCOptionUtils;
 
-import fr.spse.gamepad_remapper.GamepadHandler;
-import fr.spse.gamepad_remapper.RemapperManager;
-import fr.spse.gamepad_remapper.RemapperView;
-import git.artdeell.dnbootstrap.glfw.GamepadEnableHandler;
+import git.artdeell.mojo.R;
 import git.artdeell.mojoexec.MojoExec;
 
-import static net.kdt.pojavlaunch.platform.Platform.PLATFORM;
+import static net.kdt.pojavlaunch.game.platform.Platform.PLATFORM;
+
+import java.util.Objects;
 
 /**
  * Class dealing with showing minecraft surface and taking inputs to dispatch them to minecraft
  */
-public class LauncherGLSurface extends View implements PlatformGrabListener, GamepadEnableHandler, SurfaceProvider.SurfaceCallback {
-    /* Gamepad object for gamepad inputs, instantiated on need */
-    private GamepadHandler mGamepadHandler;
-    /* The RemapperView.Builder object allows you to set which buttons to remap */
-    private final RemapperManager mInputManager = new RemapperManager(getContext(), new RemapperView.Builder(null)
-            .remapA(true)
-            .remapB(true)
-            .remapX(true)
-            .remapY(true)
-
-            .remapLeftJoystick(true)
-            .remapRightJoystick(true)
-            .remapStart(true)
-            .remapSelect(true)
-            .remapLeftShoulder(true)
-            .remapRightShoulder(true)
-            .remapLeftTrigger(true)
-            .remapRightTrigger(true)
-            .remapDpad(true));
+public class GameView extends FrameLayout implements PlatformGrabListener, SurfaceProvider.SurfaceCallback {
 
     /* Sensitivity, adjusted according to screen size */
     private final double mSensitivityFactor = (1.4 * (1080f/ Tools.getDisplayMetrics((Activity) getContext()).heightPixels));
@@ -79,43 +59,51 @@ public class LauncherGLSurface extends View implements PlatformGrabListener, Gam
     final Object mSurfaceReadyListenerLock = new Object();
     /* View holding the surface, either a SurfaceView or a TextureView */
     View mSurface;
+    GameCursorView mCursorView;
 
     private final InGameEventProcessor mIngameProcessor = new InGameEventProcessor(this, mSensitivityFactor);
     private final InGUIEventProcessor mInGUIProcessor = new InGUIEventProcessor(this);
     private TouchEventProcessor mCurrentTouchProcessor = mInGUIProcessor;
     private AndroidPointerCapture mPointerCapture;
-    private View mTouchpad;
     private boolean mLastGrabState = false;
+    double cursorRatioX = 0;
+    double cursorRatioY = 0;
 
-    public LauncherGLSurface(Context context) {
+    public GameView(Context context) {
         this(context, null);
     }
 
-    public LauncherGLSurface(Context context, AttributeSet attributeSet) {
+    public GameView(Context context, AttributeSet attributeSet) {
         super(context, attributeSet);
         setFocusable(true);
-        Platform.setGamepadEnableHandler(this);
+        Platform.addGrabListener(this);
+    }
+
+    // This is required to actually get the CursorView object
+    @Override
+    public void onFinishInflate(){
+        super.onFinishInflate();
+        mCursorView = findViewById(R.id.main_cursorview);
+        Platform.setCursorImplementor(mCursorView);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void setUpPointerCapture() {
         if(mPointerCapture != null) mPointerCapture.detach();
-        mPointerCapture = new AndroidPointerCapture(mTouchpad, this);
+        mPointerCapture = new AndroidPointerCapture(mCursorView, this);
     }
 
     /** Initialize the view and all its settings
      * @param isAlreadyRunning set to true to tell the view that the game is already running
      *                         (only updates the window without calling the start listener)
-     * @param touchpad the optional cursor-emulating touchpad, used for touch event processing
-     *                 when the cursor is not grabbed
      */
-    public void start(boolean isAlreadyRunning, View touchpad) {
-        mTouchpad = touchpad;
+    public void start(boolean isAlreadyRunning) {
         if (Tools.isAndroid8OrHigher()) setUpPointerCapture();
-        mInGUIProcessor.setAbstractTouchpad(touchpad);
+        mInGUIProcessor.setAbstractTouchpad(mCursorView);
         mRefreshOnly = isAlreadyRunning;
         mSurface = mSurfaceProvider.create(getContext(), this);
-        ((ViewGroup) getParent()).addView(mSurface);
+        this.addView(mSurface);
+        this.mCursorView.bringToFront();
     }
 
     /**
@@ -127,7 +115,6 @@ public class LauncherGLSurface extends View implements PlatformGrabListener, Gam
     public boolean onTouchEvent(MotionEvent e) {
         // Kinda need to send this back to the layout
         if(((ControlLayout)getParent()).getModifiable()) return false;
-
         // Looking for a mouse to handle, won't have an effect if no mouse exists.
         for (int i = 0; i < e.getPointerCount(); i++) {
             int toolType = e.getToolType(i);
@@ -142,38 +129,33 @@ public class LauncherGLSurface extends View implements PlatformGrabListener, Gam
             // Mouse found
             // Avoid going through the JNI each time.
             if(Platform.isGrabbing()) return false;
-            Platform.cursorX = e.getX(i) / getWidth();
-            Platform.cursorY = e.getY(i) / getHeight();
-            PLATFORM.sendMousePosition();
+            Platform.cursorX = e.getX(i) / cursorRatioX;
+            Platform.cursorY = e.getY(i) / cursorRatioY;
+            Platform.sendCursorPosition();
             return true; //mouse event handled successfully
         }
         if (mIngameProcessor == null || mInGUIProcessor == null) return true;
         boolean ret = mCurrentTouchProcessor.processTouchEvent(e);
         // Keep cursor on screen if panning with IME inset
-        if(LauncherPreferences.PREF_KEYBOARD_AUTOPANNING && MainActivity.mImeHeight > 0){
+        if(LauncherPreferences.PREF_KEYBOARD_AUTOPANNING && GameActivity.mImeHeight > 0){
             int translationY = Tools.getTranslationFromCursorY(
-                    (int)(Platform.cursorY * mSurface.getHeight() + 100),
-                    mSurface.getHeight(),
-                    MainActivity.mImeHeight,
+                    (int) (Platform.cursorY * cursorRatioY + 100),
+                    getHeight(),
+                    GameActivity.mImeHeight,
                     0
             );
             // If the view was force panned (KeyboardPan keycode) apply an animation instead of immediate override
             // This fixes weird jumps when the user moves the cursor first time after pressing that keycode
-            if(MainActivity.mForceFullPanning) {
+            if(GameActivity.mForcedPanningHeight != 0) {
                 mSurface.animate().setDuration(100).translationY(-translationY).start();
-                mTouchpad.animate().setDuration(100).translationY(-translationY).start();
-                MainActivity.mForceFullPanning = false;
+                mCursorView.animate().setDuration(100).translationY(-translationY).start();
+                GameActivity.mForcedPanningHeight = 0;
             } else {
                 mSurface.setTranslationY(-translationY);
-                mTouchpad.setTranslationY(-translationY);
+                mCursorView.setTranslationY(-translationY);
             }
         }
         return ret;
-    }
-
-    private void createGamepad(InputDevice inputDevice) {
-        if(Platform.getPlatformGamepad() == null || Platform.getPlatformGamepad().shouldOverride())
-            mGamepadHandler = new Gamepad(inputDevice, DefaultDataProvider.INSTANCE, mTouchpad);
     }
 
     /**
@@ -185,12 +167,9 @@ public class LauncherGLSurface extends View implements PlatformGrabListener, Gam
         int mouseCursorIndex = -1;
 
         if(Gamepad.isGamepadEvent(event)){
-            if(Platform.getPlatformGamepad() != null && Platform.getPlatformGamepad().shouldOverride()){
-                Platform.getPlatformGamepad().sendMotionEvent(event);
-                return true;
-            }
-            if(mGamepadHandler == null) createGamepad(event.getDevice());
-            mInputManager.handleMotionEventInput(getContext(), event, mGamepadHandler);
+            if(Platform.getPlatformGamepad() == null)
+                Platform.createGenericGamepad(event.getDevice(), mCursorView);
+            Platform.getPlatformGamepad().sendMotionEvent(event);
             return true;
         }
 
@@ -208,9 +187,9 @@ public class LauncherGLSurface extends View implements PlatformGrabListener, Gam
 
         switch(event.getActionMasked()) {
             case MotionEvent.ACTION_HOVER_MOVE:
-                Platform.cursorX = event.getX(mouseCursorIndex) / getWidth();
-                Platform.cursorY = event.getY(mouseCursorIndex) / getHeight();
-                PLATFORM.sendMousePosition();
+                Platform.cursorX = event.getX(mouseCursorIndex) / cursorRatioX;
+                Platform.cursorY = event.getY(mouseCursorIndex) / cursorRatioY;
+                Platform.sendCursorPosition();
                 return true;
             case MotionEvent.ACTION_SCROLL:
                 CallbackBridge.sendScroll(event.getAxisValue(MotionEvent.AXIS_HSCROLL), event.getAxisValue(MotionEvent.AXIS_VSCROLL));
@@ -259,19 +238,16 @@ public class LauncherGLSurface extends View implements PlatformGrabListener, Gam
         }
 
         if(Gamepad.isGamepadEvent(event)){
-            if(Platform.getPlatformGamepad() != null && Platform.getPlatformGamepad().shouldOverride()){
-                Platform.getPlatformGamepad().sendKeyEvent(event);
-                return true;
-            }
-            if(mGamepadHandler == null) createGamepad(event.getDevice());
-
-            mInputManager.handleKeyEventInput(getContext(), event, mGamepadHandler);
+            if(Platform.getPlatformGamepad() == null)
+                Platform.createGenericGamepad(event.getDevice(), mCursorView);
+            Platform.getPlatformGamepad().sendKeyEvent(event);
             return true;
         }
 
         CallbackBridge.setModifiers(event);
         char codepoint = action == KeyEvent.ACTION_DOWN ? (char) event.getUnicodeChar(event.getMetaState()) : 0;
-        PLATFORM.sendKeyEvent(eventKeycode, action == KeyEvent.ACTION_DOWN ? 1 : 0, CallbackBridge.getCurrentMods(), codepoint);
+        if(PLATFORM.sendKeyEvent(eventKeycode, action == KeyEvent.ACTION_DOWN ? 1 : 0, CallbackBridge.getCurrentMods(), codepoint))
+            return true;
 
         // Some events will be generated an infinite number of times when no consumed
         return (event.getFlags() & KeyEvent.FLAG_FALLBACK) == KeyEvent.FLAG_FALLBACK;
@@ -299,12 +275,18 @@ public class LauncherGLSurface extends View implements PlatformGrabListener, Gam
         }
         windowWidth = newWidth;
         windowHeight = newHeight;
-        windowRate = mSurface.getDisplay().getRefreshRate();
+
+        // Update cursor ratio values
+        // Mouse events are sent in the full view coordinate space, the game accepts them only in the window space
+        this.cursorRatioX = (double) getWidth() / windowWidth;
+        this.cursorRatioY = (double) getHeight() / windowHeight;
+
         if(mSurface == null){
             Log.w("MGLSurface", "Attempt to refresh size on null surface");
             return;
         }
-        MojoExec.setDisplayParams(windowWidth, windowHeight, mSurface.getDisplay().getRefreshRate());
+        windowRate = mSurface.getDisplay().getRefreshRate();
+        MojoExec.setDisplayParams(windowWidth, windowHeight, windowRate);
         mSurfaceProvider.updateSize();
     }
 
@@ -354,8 +336,7 @@ public class LauncherGLSurface extends View implements PlatformGrabListener, Gam
 
     @Override
     public void onSurfaceAvailable(Surface surface) {
-        Platform.addGrabListener(this);
-        Platform.setPendingSurface(surface);
+        Platform.updateSurface(surface);
         if(mRefreshOnly) return;
         realStart();
         mRefreshOnly = true;
@@ -371,17 +352,6 @@ public class LauncherGLSurface extends View implements PlatformGrabListener, Gam
     public void onSurfaceDestroyed() {
         if(PLATFORM != null)
             PLATFORM.surfaceDestroyed();
-    }
-
-    @Override
-    public void onEnableGamepad() {
-        post(()->{
-            if(mGamepadHandler != null && mGamepadHandler instanceof Gamepad) {
-                ((Gamepad)mGamepadHandler).removeSelf();
-            }
-            // Force gamepad recreation on next event
-            mGamepadHandler = null;
-        });
     }
 
     /** A small interface called when the listener is ready for the first time */
@@ -403,5 +373,12 @@ public class LauncherGLSurface extends View implements PlatformGrabListener, Gam
     }
     public static float getWindowRate(){
         return windowRate;
+    }
+    public double getCursorRatioX(){
+        return cursorRatioX;
+    }
+
+    public double getCursorRatioY() {
+        return cursorRatioY;
     }
 }

@@ -1,10 +1,13 @@
-package net.kdt.pojavlaunch.customcontrols.mouse;
+package net.kdt.pojavlaunch.game;
 
 import android.view.MotionEvent;
 import android.view.View;
 
-import net.kdt.pojavlaunch.LwjglGlfwKeycode;
 import net.kdt.pojavlaunch.Tools;
+import net.kdt.pojavlaunch.customcontrols.mouse.LeftClickGesture;
+import net.kdt.pojavlaunch.customcontrols.mouse.PointerTracker;
+import net.kdt.pojavlaunch.customcontrols.mouse.Scroller;
+import net.kdt.pojavlaunch.customcontrols.mouse.TapDetector;
 import net.kdt.pojavlaunch.prefs.LauncherPreferences;
 
 import net.kdt.pojavlaunch.CallbackBridge;
@@ -20,7 +23,7 @@ public class InGUIEventProcessor extends TouchEventProcessor {
     private float mStartX, mStartY;
     private final Scroller mScroller = new Scroller(FINGER_SCROLL_THRESHOLD);
 
-    public InGUIEventProcessor(View hostView) {
+    public InGUIEventProcessor(GameView hostView) {
         super(hostView);
         mSingleTapDetector = new TapDetector(1, TapDetector.DETECTION_METHOD_BOTH);
     }
