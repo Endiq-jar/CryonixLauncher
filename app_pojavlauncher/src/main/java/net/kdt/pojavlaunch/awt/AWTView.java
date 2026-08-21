@@ -47,7 +47,6 @@ public class AWTView extends SurfaceView implements SurfaceHolder.Callback {
 
     @Override
     public void surfaceCreated(@NonNull SurfaceHolder holder) {
-        AWTWindow.setNativeSize(AWT_CANVAS_WIDTH, AWT_CANVAS_HEIGHT);
         getHolder().setFixedSize(AWT_CANVAS_WIDTH, AWT_CANVAS_HEIGHT);
         Platform.PLATFORM.surfaceCreated(holder.getSurface());
     }

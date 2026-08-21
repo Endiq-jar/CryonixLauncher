@@ -1,24 +1,17 @@
 package net.kdt.pojavlaunch.game.platform.backend;
 
-import static net.kdt.pojavlaunch.awt.AWTInput.EVENT_TYPE_CHAR;
 import static net.kdt.pojavlaunch.awt.AWTInput.EVENT_TYPE_CURSOR_POS;
 import static net.kdt.pojavlaunch.awt.AWTInput.EVENT_TYPE_KEY;
 import static net.kdt.pojavlaunch.awt.AWTInput.EVENT_TYPE_MOUSE_BUTTON;
 
-import android.util.Log;
+import android.view.MotionEvent;
 import android.view.Surface;
 
 import net.kdt.pojavlaunch.CallbackBridge;
-import net.kdt.pojavlaunch.PojavApplication;
-import net.kdt.pojavlaunch.Tools;
 import net.kdt.pojavlaunch.awt.AWTInput;
-import net.kdt.pojavlaunch.awt.AWTView;
+import net.kdt.pojavlaunch.awt.AWTKeycode;
 import net.kdt.pojavlaunch.awt.AWTWindow;
-import net.kdt.pojavlaunch.game.GameView;
 import net.kdt.pojavlaunch.game.platform.Platform;
-
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 public class AWTBackend implements PlatformBackend {
     static {
@@ -27,10 +20,8 @@ public class AWTBackend implements PlatformBackend {
     @Override
     public void surfaceCreated(Surface surface) {
         Platform.grabStateChanged(false);
-        AWTWindow.setNativeSize(CallbackBridge.windowWidth, CallbackBridge.windowHeight);
-        AWTWindow.setNativeSurface(surface);
         // AWT requires us to manually draw on the screen
-        PojavApplication.sExecutorService.submit(AWTWindow::beginRendering);
+        AWTWindow.beginRendering(surface, CallbackBridge.windowWidth, CallbackBridge.windowHeight);
     }
 
     @Override
@@ -41,7 +32,6 @@ public class AWTBackend implements PlatformBackend {
     @Override
     public void surfaceDestroyed() {
         AWTWindow.endRendering();
-        AWTWindow.destroySurface();
     }
 
     @Override
@@ -49,9 +39,21 @@ public class AWTBackend implements PlatformBackend {
         AWTInput.nativeSendData(EVENT_TYPE_CURSOR_POS, (int) Platform.cursorX, (int) Platform.cursorY, 0, 0);
     }
 
+    private static int translateMouseKeycode(int keycode) {
+        switch (keycode) {
+            case MotionEvent.BUTTON_PRIMARY: return AWTKeycode.BUTTON1_DOWN_MASK;
+            case MotionEvent.BUTTON_SECONDARY: return AWTKeycode.BUTTON3_DOWN_MASK;
+            case MotionEvent.BUTTON_TERTIARY: return AWTKeycode.BUTTON2_DOWN_MASK;
+            default:
+                return -1;
+        }
+    };
+
     @Override
     public void sendMouseEvent(int button, int state, int mods) {
-        AWTInput.nativeSendData(EVENT_TYPE_MOUSE_BUTTON, button, state, 0, 0);
+        int code = translateMouseKeycode(button);
+        if(code == -1) return;
+        AWTInput.nativeSendData(EVENT_TYPE_MOUSE_BUTTON, code, state, 0, 0);
     }
 
     @Override

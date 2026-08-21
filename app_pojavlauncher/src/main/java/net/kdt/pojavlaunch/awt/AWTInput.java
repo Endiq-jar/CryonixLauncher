@@ -24,20 +24,5 @@ public class AWTInput {
         Platform.PLATFORM.sendKeyEvent(0, 0, CallbackBridge.getCurrentMods(), keychar);
     }
 
-    public static void sendMousePress(int awtButtons, boolean isDown) {
-        Platform.PLATFORM.sendMouseEvent(awtButtons, isDown ? 1 : 0, CallbackBridge.getCurrentMods());
-    }
-
-    public static void sendMousePress(int awtButtons) {
-        sendMousePress(awtButtons, true);
-        sendMousePress(awtButtons, false);
-    }
-
-    public static void sendMousePos(int x, int y) {
-        Platform.cursorX = x;
-        Platform.cursorY = y;
-        Platform.PLATFORM.sendMousePosition();
-    }
-
     public static native void nativeSendData(int type, int i1, int i2, int i3, int i4);
 }

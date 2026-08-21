@@ -20,38 +20,30 @@ jmethodID method_GetFrames;
 jmethodID method_GetBounds;
 jmethodID method_SetBounds;
 
-jclass class_CTCScreen;
-jmethodID method_GetRGB;
+static jclass class_CTCScreen = NULL;
+static jmethodID method_GetRGB = NULL;
 
 jfieldID field_x;
 jfieldID field_y;
 
-JNIEnv* runtimeEnv;
-
-ANativeWindow* anw;
-
-static jint w;
-static jint h;
-
 static _Atomic bool is_rendering = false;
-static pthread_t thread;
+static pthread_t render_thread = 0;
 
-void setup_jni() {
-    if (method_GetRGB == NULL) {
-        class_CTCScreen = (*runtimeEnv)->FindClass(runtimeEnv, "net/java/openjdk/cacio/ctc/CTCScreen");
-        if ((*runtimeEnv)->ExceptionCheck(runtimeEnv) == JNI_TRUE) {
-            (*runtimeEnv)->ExceptionClear(runtimeEnv);
-            class_CTCScreen = (*runtimeEnv)->FindClass(runtimeEnv, "com/github/caciocavallosilano/cacio/ctc/CTCScreen");
-        }
-        assert(class_CTCScreen != NULL);
-        method_GetRGB = (*runtimeEnv)->GetStaticMethodID(runtimeEnv, class_CTCScreen, "getCurrentScreenRGB", "()[I");
-        assert(method_GetRGB != NULL);
+void setup_jni(JNIEnv *env) {
+    if(method_GetRGB != NULL) return;
+    class_CTCScreen = (*env)->FindClass(env, "net/java/openjdk/cacio/ctc/CTCScreen");
+    if ((*env)->ExceptionCheck(env) == JNI_TRUE) {
+        (*env)->ExceptionClear(env);
+        class_CTCScreen = (*env)->FindClass(env, "com/github/caciocavallosilano/cacio/ctc/CTCScreen");
     }
+    assert(class_CTCScreen != NULL);
+    method_GetRGB = (*env)->GetStaticMethodID(env, class_CTCScreen, "getCurrentScreenRGB", "()[I");
+    assert(method_GetRGB != NULL);
 }
 
-static void* acquire_cacio_screenbuffer(jint* arrayLength, jintArray* rgbArray) {
-    *rgbArray = (jintArray) (*runtimeEnv)->CallStaticObjectMethod(
-            runtimeEnv,
+static void* acquire_cacio_screenbuffer(JNIEnv *env, jint* arrayLength, jintArray* rgbArray) {
+    *rgbArray = (jintArray) (*env)->CallStaticObjectMethod(
+            env,
             class_CTCScreen,
             method_GetRGB
     );
@@ -59,63 +51,84 @@ static void* acquire_cacio_screenbuffer(jint* arrayLength, jintArray* rgbArray) 
         return NULL;
     }
 
-    *arrayLength = (*runtimeEnv)->GetArrayLength(runtimeEnv, *rgbArray);
-    return (*runtimeEnv)->GetPrimitiveArrayCritical(runtimeEnv, *rgbArray, NULL);
+    *arrayLength = (*env)->GetArrayLength(env, *rgbArray);
+    return (*env)->GetPrimitiveArrayCritical(env, *rgbArray, NULL);
 }
 
-static void release_cacio_screenbuffer(jintArray rgbArray, void* src_buf) {
-    (*runtimeEnv)->ReleasePrimitiveArrayCritical(runtimeEnv, rgbArray, src_buf, 0);
+static void release_cacio_screenbuffer(JNIEnv *env, jintArray rgbArray, void* src_buf) {
+    (*env)->ReleasePrimitiveArrayCritical(env, rgbArray, src_buf, 0);
 }
 
-// TODO: check for memory leaks
-JNIEXPORT void JNICALL Java_net_kdt_pojavlaunch_awt_AWTWindow_beginRendering(JNIEnv* env, jclass clazz) {
-    if(!anw) return;
-    thread = pthread_self();
-    if (!runtimeVM) {
-        pthread_mutex_lock(&vm_wait_mutex);
-        pthread_cond_wait(&vm_wait_cond, &vm_wait_mutex);
-        pthread_mutex_unlock(&vm_wait_mutex);
-        if(isVmConnected) {
-            (*runtimeVM)->AttachCurrentThreadAsDaemon(runtimeVM, &runtimeEnv, NULL);
-        }
-    }
-    setup_jni();
-    ARect rect;
-    rect.top = 0;
-    rect.left = 0;
+static void* render_loop_thread(void* param) {
+    ANativeWindow *window = (ANativeWindow*) param;
+    JNIEnv *env;
 
     is_rendering = true;
 
+    if (!isVmConnected) {
+        pthread_mutex_lock(&vm_wait_mutex);
+        pthread_cond_wait(&vm_wait_cond, &vm_wait_mutex);
+        pthread_mutex_unlock(&vm_wait_mutex);
+        // If the VM was not connected but thread shutdown is wanted, then do not proceed,
+        // just release and exit.
+        if(!is_rendering) goto exit;
+    }
+
+    (*runtimeVM)->AttachCurrentThreadAsDaemon(runtimeVM, &env, NULL);
+
+    setup_jni(env);
+
+    jintArray array;
+    jint length;
+    ANativeWindow_Buffer buffer;
+
     while(is_rendering) {
+        void* buf = acquire_cacio_screenbuffer(env, &length, &array);
+        if(!length || !buf) continue;
 
-        rect.bottom = h;
-        rect.right = w;
-
-        ANativeWindow_Buffer buffer;
-
-        int res = ANativeWindow_lock(anw, &buffer, &rect);
-
-        if(res) {
-            __android_log_print(ANDROID_LOG_ERROR, "AWT", "Failed to lock native window: %d", res);
-            break;
+        int32_t res;
+        if((res = ANativeWindow_lock(window, &buffer, NULL))) {
+            __android_log_print(ANDROID_LOG_ERROR, "AWTRender", "Failed to lock buffer: %"PRIi32, res);
+            goto end;
         }
-
-        jintArray array;
-        jint length;
-        void* buf = acquire_cacio_screenbuffer(&length, &array);
-        if(!length || !buf) goto end;
 
         jint *dst = (jint*)buffer.bits;
         jint *src = (jint*)buf;
 
-        __android_log_print(ANDROID_LOG_INFO, "AWT", "RENDERING!");
         for(int y = 0; y < buffer.height; y++) {
-            memcpy(&dst[y*buffer.stride], &src[y*buffer.width], buffer.width * sizeof(jint));
+            memcpy(&dst[y * buffer.stride], &src[y * buffer.width], buffer.width * sizeof(jint));
         }
-        release_cacio_screenbuffer(array, src);
+
+        ANativeWindow_unlockAndPost(window);
         end:
-        ANativeWindow_unlockAndPost(anw);
+        release_cacio_screenbuffer(env, array, src);
     }
+
+    (*runtimeVM)->DetachCurrentThread(runtimeVM);
+    native_window_api_disconnect(window, NATIVE_WINDOW_API_CPU);
+    exit:
+    ANativeWindow_release(window);
+
+    return NULL;
+}
+
+static void render_loop_shutdown() {
+    is_rendering = false;
+    pthread_mutex_lock(&vm_wait_mutex);
+    pthread_cond_broadcast(&vm_wait_cond);
+    pthread_mutex_unlock(&vm_wait_mutex);
+    pthread_join(render_thread, NULL);
+    render_thread = 0;
+}
+
+// TODO: check for memory leaks
+JNIEXPORT void JNICALL Java_net_kdt_pojavlaunch_awt_AWTWindow_beginRendering(JNIEnv* env, jclass clazz, jobject surface, jint width, jint height) {
+    ANativeWindow *window = ANativeWindow_fromSurface(env, surface);
+    ANativeWindow_setBuffersGeometry(window, width, height, AHARDWAREBUFFER_FORMAT_R8G8B8X8_UNORM);
+    if(render_thread) {
+        render_loop_shutdown();
+    }
+    pthread_create(&render_thread, NULL, render_loop_thread, window);
 }
 
 JNIEXPORT void JNICALL
@@ -152,39 +165,6 @@ Java_net_kdt_pojavlaunch_awt_AWTWindow_nativeMoveWindow(JNIEnv *env, jclass claz
 }
 
 JNIEXPORT void JNICALL
-Java_net_kdt_pojavlaunch_awt_AWTWindow_setNativeSurface(JNIEnv *env, jclass clazz,
-                                                        jobject surface) {
-    anw = ANativeWindow_fromSurface(env, surface);
-    __android_log_print(ANDROID_LOG_INFO, "AWT", "Acquired native window : %p", anw);
-    ANativeWindow_setBuffersGeometry(anw, w, h, WINDOW_FORMAT_RGBX_8888);
-}
-
-JNIEXPORT void JNICALL
-Java_net_kdt_pojavlaunch_awt_AWTWindow_destroySurface(JNIEnv *env, jclass clazz) {
-    __android_log_print(ANDROID_LOG_INFO, "AWT", "Detaching native window : %p", anw);
-    ANativeWindow_setBuffersGeometry(anw, 0, 0, 0);
-    native_window_api_disconnect(anw, NATIVE_WINDOW_API_CPU);
-    ANativeWindow_release(anw);
-    anw = NULL;
-}
-
-JNIEXPORT void JNICALL
-Java_net_kdt_pojavlaunch_awt_AWTWindow_setNativeSize(JNIEnv *env, jclass clazz, jint width,
-                                                     jint height) {
-    w = width;
-    h = height;
-}
-
-JNIEXPORT void JNICALL
 Java_net_kdt_pojavlaunch_awt_AWTWindow_endRendering(JNIEnv *env, jclass clazz) {
-    is_rendering = false;
-    isVmConnected = false;
-    if(thread) {
-        pthread_join(thread, NULL);
-    }
-    if(runtimeVM) {
-        (*runtimeVM)->DetachCurrentThread(runtimeVM);
-        runtimeEnv = NULL;
-        runtimeVM = NULL;
-    }
+    render_loop_shutdown();
 }

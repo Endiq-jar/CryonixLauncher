@@ -1,7 +1,6 @@
 package net.kdt.pojavlaunch.awt;
 
 import android.annotation.SuppressLint;
-import android.content.ClipboardManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -26,6 +25,7 @@ import net.kdt.pojavlaunch.SingleTapConfirm;
 import net.kdt.pojavlaunch.Tools;
 import net.kdt.pojavlaunch.customcontrols.keyboard.AwtCharSender;
 import net.kdt.pojavlaunch.customcontrols.keyboard.TouchCharInput;
+import net.kdt.pojavlaunch.game.platform.Platform;
 import net.kdt.pojavlaunch.multirt.MultiRTUtils;
 import net.kdt.pojavlaunch.multirt.Runtime;
 import net.kdt.pojavlaunch.prefs.LauncherPreferences;
@@ -62,7 +62,7 @@ public class AWTActivity extends BaseActivity implements View.OnTouchListener {
 
     private boolean mIsVirtualMouseEnabled;
     private boolean mIsTrusted;
-    
+
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,7 +124,7 @@ public class AWTActivity extends BaseActivity implements View.OnTouchListener {
 
                 if (mGestureDetector.onTouchEvent(event)) {
                     sendScaledMousePosition(mouseX,mouseY);
-                    AWTInput.sendMousePress(AWTKeycode.BUTTON1_DOWN_MASK);
+                    CallbackBridge.performClick(MotionEvent.BUTTON_PRIMARY);
                 } else {
                     if (action == MotionEvent.ACTION_MOVE) { // 2
                         mouseX = Math.max(0, Math.min(v.getWidth(), mouseX + x - prevX));
@@ -145,7 +145,7 @@ public class AWTActivity extends BaseActivity implements View.OnTouchListener {
             float y = event.getY();
             if (mGestureDetector.onTouchEvent(event)) {
                 sendScaledMousePosition(x + mTextureView.getX(), y);
-                AWTInput.sendMousePress(AWTKeycode.BUTTON1_DOWN_MASK);
+                CallbackBridge.performClick(MotionEvent.BUTTON_PRIMARY);
                 return true;
             }
 
@@ -304,11 +304,11 @@ public class AWTActivity extends BaseActivity implements View.OnTouchListener {
         
         switch (v.getId()) {
             case R.id.installmod_mouse_pri:
-                AWTInput.sendMousePress(AWTKeycode.BUTTON1_DOWN_MASK, isDown);
+                Platform.PLATFORM.sendMouseEvent(MotionEvent.BUTTON_PRIMARY, isDown ? 1 : 0, CallbackBridge.getCurrentMods());
                 break;
                 
             case R.id.installmod_mouse_sec:
-                AWTInput.sendMousePress(AWTKeycode.BUTTON3_DOWN_MASK, isDown);
+                Platform.PLATFORM.sendMouseEvent(MotionEvent.BUTTON_SECONDARY, isDown ? 1 : 0, CallbackBridge.getCurrentMods());
                 break;
         }
         if(isDown) switch(v.getId()) {
@@ -339,10 +339,9 @@ public class AWTActivity extends BaseActivity implements View.OnTouchListener {
         x = androidx.core.math.MathUtils.clamp(x, mTextureView.getX(), mTextureView.getX() + mTextureView.getWidth());
         y = androidx.core.math.MathUtils.clamp(y, mTextureView.getY(), mTextureView.getY() + mTextureView.getHeight());
 
-        AWTInput.sendMousePos(
-                (int) MathUtils.map(x, mTextureView.getX(), mTextureView.getX() + mTextureView.getWidth(), 0, AWTView.AWT_CANVAS_WIDTH),
-                (int) MathUtils.map(y, mTextureView.getY(), mTextureView.getY() + mTextureView.getHeight(), 0, AWTView.AWT_CANVAS_HEIGHT)
-                );
+        Platform.cursorX = (int) MathUtils.map(x, mTextureView.getX(), mTextureView.getX() + mTextureView.getWidth(), 0, CallbackBridge.windowWidth);
+        Platform.cursorY = (int) MathUtils.map(y, mTextureView.getY(), mTextureView.getY() + mTextureView.getHeight(), 0, CallbackBridge.windowHeight);
+        Platform.PLATFORM.sendMousePosition();
     }
 
     public void forceClose(View v) {
