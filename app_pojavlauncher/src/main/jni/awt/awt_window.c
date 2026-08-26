@@ -121,18 +121,30 @@ static void render_loop_shutdown() {
     render_thread = 0;
 }
 
-// TODO: check for memory leaks
-JNIEXPORT void JNICALL Java_net_kdt_pojavlaunch_awt_AWTWindow_beginRendering(JNIEnv* env, jclass clazz, jobject surface, jint width, jint height) {
+static void update_dims(jint width, jint height) {
+    inputXRatio = CANVAS_WIDTH / (float)width;
+    inputYRatio = CANVAS_HEIGHT / (float)height;
+}
+
+JNIEXPORT void JNICALL
+Java_net_kdt_pojavlaunch_game_platform_backend_AWTBackend_nativeBeginRendering(JNIEnv *env,
+                                                                               jclass clazz,
+                                                                               jobject surface,
+                                                                               jint bridge_width,
+                                                                               jint bridge_height) {
     ANativeWindow *window = ANativeWindow_fromSurface(env, surface);
-    ANativeWindow_setBuffersGeometry(window, width, height, AHARDWAREBUFFER_FORMAT_R8G8B8X8_UNORM);
+    ANativeWindow_setBuffersGeometry(window, CANVAS_WIDTH, CANVAS_HEIGHT, AHARDWAREBUFFER_FORMAT_R8G8B8X8_UNORM);
     if(render_thread) {
         render_loop_shutdown();
     }
+    update_dims(bridge_width, bridge_height);
     pthread_create(&render_thread, NULL, render_loop_thread, window);
 }
 
 JNIEXPORT void JNICALL
-Java_net_kdt_pojavlaunch_awt_AWTWindow_nativeMoveWindow(JNIEnv *env, jclass clazz, jint xoff, jint yoff) {
+Java_net_kdt_pojavlaunch_game_platform_backend_AWTBackend_nativeMoveWindow(JNIEnv *env,
+                                                                           jclass clazz, jint xoff,
+                                                                           jint yoff) {
     if (JNIEnv_InputRuntime == NULL) {
         if (runtimeVM == NULL) {
             return;
@@ -165,6 +177,15 @@ Java_net_kdt_pojavlaunch_awt_AWTWindow_nativeMoveWindow(JNIEnv *env, jclass claz
 }
 
 JNIEXPORT void JNICALL
-Java_net_kdt_pojavlaunch_awt_AWTWindow_endRendering(JNIEnv *env, jclass clazz) {
+Java_net_kdt_pojavlaunch_game_platform_backend_AWTBackend_nativeEndRendering(JNIEnv *env,
+                                                                             jclass clazz) {
     render_loop_shutdown();
 }
+
+JNIEXPORT void JNICALL
+Java_net_kdt_pojavlaunch_game_platform_backend_AWTBackend_nativeResize(JNIEnv *env, jclass clazz,
+                                                                       jint bridge_width,
+                                                                       jint bridge_height) {
+    update_dims(bridge_width, bridge_height);
+}
+

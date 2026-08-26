@@ -11,8 +11,8 @@ import androidx.annotation.NonNull;
 import net.kdt.pojavlaunch.game.platform.Platform;
 
 public class AWTView extends SurfaceView implements SurfaceHolder.Callback {
-    public static final int AWT_CANVAS_WIDTH = 720;
-    public static final int AWT_CANVAS_HEIGHT = 600;
+    public static final int AWT_CANVAS_WIDTH = 1024;
+    public static final int AWT_CANVAS_HEIGHT = 768;
 
     public AWTView(Context ctx) {
         this(ctx, null);

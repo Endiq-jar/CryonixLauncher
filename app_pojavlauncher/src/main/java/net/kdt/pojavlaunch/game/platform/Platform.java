@@ -1,6 +1,7 @@
 package net.kdt.pojavlaunch.game.platform;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.Log;
 import android.view.InputDevice;
@@ -14,7 +15,6 @@ import net.kdt.pojavlaunch.customcontrols.gamepad.DefaultDataProvider;
 import net.kdt.pojavlaunch.customcontrols.gamepad.Gamepad;
 import net.kdt.pojavlaunch.game.platform.backend.AWTBackend;
 import net.kdt.pojavlaunch.lifecycle.ContextExecutor;
-import net.kdt.pojavlaunch.game.platform.backend.DummyBackend;
 import net.kdt.pojavlaunch.game.platform.backend.GLFWBackend;
 import net.kdt.pojavlaunch.game.platform.backend.PlatformBackend;
 import net.kdt.pojavlaunch.game.platform.backend.SDLBackend;
@@ -76,6 +76,13 @@ public class Platform {
         // GLFW also has equivalent "onDirectGamepadEnable". Hook it up
         GLFW.setGamepadEnableHandler(() -> setPlatformGamepad(new GLFWGamepad(view.getContext(), mInputManager)));
         SDLBackend.initialize(activity);
+    }
+
+    public static void initializeMinimal(Context appContext) {
+        Platform.mHostView = null;
+        Platform.mInputManager = null;
+        mClipboard = new AndroidClipboard(appContext);
+        // Do not set backend init callbacks here, as this will be functioning in single-platform mode
     }
 
     private static void onInit(PlatformBackend impl) {
@@ -173,6 +180,7 @@ public class Platform {
      * @param touchpadView A view representing on-screen "trackpad"
      */
     public static void createGenericGamepad(InputDevice device, View touchpadView){
+        if(mHostView == null || mInputManager == null) return; // Running in minimal mode
         Gamepad gamepad = new Gamepad(device, DefaultDataProvider.INSTANCE, touchpadView);
         setPlatformGamepad(new GenericGamepad(mHostView.getContext(), mInputManager, gamepad));
     }

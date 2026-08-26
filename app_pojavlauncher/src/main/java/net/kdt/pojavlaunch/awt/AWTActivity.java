@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.GestureDetector;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,9 +24,9 @@ import net.kdt.pojavlaunch.Logger;
 import net.kdt.pojavlaunch.PojavApplication;
 import net.kdt.pojavlaunch.SingleTapConfirm;
 import net.kdt.pojavlaunch.Tools;
-import net.kdt.pojavlaunch.customcontrols.keyboard.AwtCharSender;
 import net.kdt.pojavlaunch.customcontrols.keyboard.TouchCharInput;
 import net.kdt.pojavlaunch.game.platform.Platform;
+import net.kdt.pojavlaunch.game.platform.backend.AWTBackend;
 import net.kdt.pojavlaunch.multirt.MultiRTUtils;
 import net.kdt.pojavlaunch.multirt.Runtime;
 import net.kdt.pojavlaunch.prefs.LauncherPreferences;
@@ -79,10 +80,11 @@ public class AWTActivity extends BaseActivity implements View.OnTouchListener {
         }
 
         mTouchCharInput = findViewById(R.id.awt_touch_char);
-        mTouchCharInput.setCharacterSender(new AwtCharSender());
 
         CallbackBridge.windowWidth = AWTView.AWT_CANVAS_WIDTH;
         CallbackBridge.windowHeight = AWTView.AWT_CANVAS_HEIGHT;
+
+        Platform.initializeMinimal(getApplicationContext());
 
         mTouchPad = findViewById(R.id.main_touchpad);
         mLoggerView = findViewById(R.id.launcherLoggerView);
@@ -313,16 +315,16 @@ public class AWTActivity extends BaseActivity implements View.OnTouchListener {
         }
         if(isDown) switch(v.getId()) {
             case R.id.installmod_window_moveup:
-                AWTWindow.nativeMoveWindow(0, -10);
+                AWTBackend.nativeMoveWindow(0, -10);
                 break;
             case R.id.installmod_window_movedown:
-                AWTWindow.nativeMoveWindow(0, 10);
+                AWTBackend.nativeMoveWindow(0, 10);
                 break;
             case R.id.installmod_window_moveleft:
-                AWTWindow.nativeMoveWindow(-10, 0);
+                AWTBackend.nativeMoveWindow(-10, 0);
                 break;
             case R.id.installmod_window_moveright:
-                AWTWindow.nativeMoveWindow(10, 0);
+                AWTBackend.nativeMoveWindow(10, 0);
                 break;
         }
         return true;
@@ -394,16 +396,21 @@ public class AWTActivity extends BaseActivity implements View.OnTouchListener {
     public void toggleKeyboard(View view) {
         mTouchCharInput.switchKeyboardState();
     }
+
     public void performCopy(View view) {
-        AWTInput.sendKey(' ', AWTKeycode.VK_CONTROL, 1);
-        AWTInput.sendKey(' ', AWTKeycode.VK_C);
-        AWTInput.sendKey(' ', AWTKeycode.VK_CONTROL, 0);
+        CallbackBridge.setModifiers(KeyEvent.KEYCODE_CTRL_LEFT, true);
+        Platform.PLATFORM.sendKeyEvent(KeyEvent.KEYCODE_CTRL_LEFT, 1, CallbackBridge.getCurrentMods());
+        CallbackBridge.sendKeyPress(KeyEvent.KEYCODE_C);
+        Platform.PLATFORM.sendKeyEvent(KeyEvent.KEYCODE_CTRL_LEFT, 0, CallbackBridge.getCurrentMods());
+        CallbackBridge.setModifiers(KeyEvent.KEYCODE_CTRL_LEFT, false);
     }
 
     public void performPaste(View view) {
-        AWTInput.sendKey(' ', AWTKeycode.VK_CONTROL, 1);
-        AWTInput.sendKey(' ', AWTKeycode.VK_V);
-        AWTInput.sendKey(' ', AWTKeycode.VK_CONTROL, 0);
+        CallbackBridge.setModifiers(KeyEvent.KEYCODE_CTRL_LEFT, true);
+        Platform.PLATFORM.sendKeyEvent(KeyEvent.KEYCODE_CTRL_LEFT, 1, CallbackBridge.getCurrentMods());
+        CallbackBridge.sendKeyPress(KeyEvent.KEYCODE_V);
+        Platform.PLATFORM.sendKeyEvent(KeyEvent.KEYCODE_CTRL_LEFT, 0, CallbackBridge.getCurrentMods());
+        CallbackBridge.setModifiers(KeyEvent.KEYCODE_CTRL_LEFT, false);
     }
 
     private static int getJavaVersion(JarFile jarFile, String mainClass) throws IOException{

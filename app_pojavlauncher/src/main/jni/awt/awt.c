@@ -6,6 +6,9 @@
 #include <pthread.h>
 #include "awt.h"
 
+float inputXRatio = 0;
+float inputYRatio = 0;
+
 JavaVM* androidVM;
 JavaVM* runtimeVM;
 

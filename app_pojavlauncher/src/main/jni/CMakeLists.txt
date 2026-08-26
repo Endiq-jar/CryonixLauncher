@@ -59,6 +59,7 @@ add_library(pojavexec_awt SHARED
 		awt/awt_util.c
 		awt/awt_input.c
 		awt/awt_clipboard.c
+        awt/awt_mapper.c
 )
 
 target_link_libraries(pojavexec_awt PRIVATE android log)
