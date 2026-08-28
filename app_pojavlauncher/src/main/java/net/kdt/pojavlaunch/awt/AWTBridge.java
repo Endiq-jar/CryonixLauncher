@@ -1,6 +1,5 @@
 package net.kdt.pojavlaunch.awt;
 
-import android.util.Log;
 import android.view.Surface;
 
 import net.kdt.pojavlaunch.CallbackBridge;
@@ -8,7 +7,8 @@ import net.kdt.pojavlaunch.Tools;
 import net.kdt.pojavlaunch.game.platform.Platform;
 
 public class AWTBridge {
-    private static Runnable windowOpenRunnable;
+    private static Runnable enableRunnable;
+    private static boolean windowCreated = false;
 
     @SuppressWarnings("unused") // Used from native
     public static void queryClipboardString() {
@@ -32,13 +32,14 @@ public class AWTBridge {
 
     @SuppressWarnings("unused") // Used from native
     public static void notifyWindowOpened() {
-        Log.i("AWTBridge", "AWT window was opened");
-        if(windowOpenRunnable == null) return;
-        windowOpenRunnable.run();
+        if(enableRunnable == null) return;
+        if(windowCreated) return;
+        windowCreated = true;
+        enableRunnable.run();
     }
 
-    public static void setWindowOpenCallback(Runnable runnable) {
-        windowOpenRunnable = runnable;
+    public static void setEnableCallback(Runnable runnable) {
+        enableRunnable = runnable;
     }
 
     public static native void nativeClipboardReceived(String data, String mimeTypeSub);

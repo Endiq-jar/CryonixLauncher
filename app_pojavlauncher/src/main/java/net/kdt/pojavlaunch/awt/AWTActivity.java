@@ -26,6 +26,7 @@ import net.kdt.pojavlaunch.SingleTapConfirm;
 import net.kdt.pojavlaunch.Tools;
 import net.kdt.pojavlaunch.customcontrols.keyboard.TouchCharInput;
 import net.kdt.pojavlaunch.game.platform.Platform;
+import net.kdt.pojavlaunch.game.platform.backend.AWTBackend;
 import net.kdt.pojavlaunch.multirt.MultiRTUtils;
 import net.kdt.pojavlaunch.multirt.Runtime;
 import net.kdt.pojavlaunch.prefs.LauncherPreferences;
@@ -83,6 +84,7 @@ public class AWTActivity extends BaseActivity implements View.OnTouchListener {
         CallbackBridge.windowWidth = AWTView.AWT_CANVAS_WIDTH;
         CallbackBridge.windowHeight = AWTView.AWT_CANVAS_HEIGHT;
 
+        Platform.PLATFORM = new AWTBackend();
         Platform.initializeMinimal(getApplicationContext());
 
         mTouchPad = findViewById(R.id.main_touchpad);

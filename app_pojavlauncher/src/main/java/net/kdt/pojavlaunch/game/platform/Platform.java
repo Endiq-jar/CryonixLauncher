@@ -8,12 +8,14 @@ import android.view.InputDevice;
 import android.view.Surface;
 import android.view.View;
 
+import net.kdt.pojavlaunch.awt.AWTBridge;
 import net.kdt.pojavlaunch.game.GameView;
 import net.kdt.pojavlaunch.game.GameActivity;
 import net.kdt.pojavlaunch.Tools;
 import net.kdt.pojavlaunch.customcontrols.gamepad.DefaultDataProvider;
 import net.kdt.pojavlaunch.customcontrols.gamepad.Gamepad;
 import net.kdt.pojavlaunch.game.platform.backend.AWTBackend;
+import net.kdt.pojavlaunch.game.platform.backend.DummyBackend;
 import net.kdt.pojavlaunch.lifecycle.ContextExecutor;
 import net.kdt.pojavlaunch.game.platform.backend.GLFWBackend;
 import net.kdt.pojavlaunch.game.platform.backend.PlatformBackend;
@@ -42,7 +44,7 @@ import git.mojo.sdl.SDLControllerManager;
 public class Platform {
     // Always reset cursor on grab lost - makes it move to the center as should if the game didn't move it
     private static final boolean RESET_CURSOR_UNGRAB = true;
-    public static PlatformBackend PLATFORM = new AWTBackend(); // Initialize a dummy platform - the game will initialize correct one later
+    public static PlatformBackend PLATFORM = new DummyBackend();
     public static double cursorX;
     public static double cursorY;
     private static final List<PlatformGrabListener> grabListeners = new ArrayList<>();
@@ -67,6 +69,7 @@ public class Platform {
         mClipboard = new AndroidClipboard(activity.getApplicationContext());
         GLFW.setInitCallback(() -> onInit(new GLFWBackend()));
         SDLActivity.setInitCallback(() -> onInit(new SDLBackend()));
+        AWTBridge.setEnableCallback(() -> onInit(new AWTBackend()));
         SDLActivity.setClipboard(mClipboard);
         GLFW.setClipboardImpl(mClipboard);
         // SDL can handle gamepads on its own, so route all events through it
