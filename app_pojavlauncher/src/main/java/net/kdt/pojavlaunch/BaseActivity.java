@@ -51,11 +51,13 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     @Override
     public void onMultiWindowModeChanged(boolean isInMultiWindowMode) {
+        super.onMultiWindowModeChanged(isInMultiWindowMode);
         onMultiWindowModeChangedInner();
     }
 
     @Override
     public void onMultiWindowModeChanged(boolean isInMultiWindowMode, @NonNull Configuration newConfig) {
+        super.onMultiWindowModeChanged(isInMultiWindowMode, newConfig);
         onMultiWindowModeChangedInner();
     }
 
