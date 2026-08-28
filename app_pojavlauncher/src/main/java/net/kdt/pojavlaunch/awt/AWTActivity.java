@@ -339,11 +339,11 @@ public class AWTActivity extends BaseActivity implements View.OnTouchListener {
     @SuppressWarnings("SuspiciousNameCombination")
     void sendScaledMousePosition(float x, float y){
         // Clamp positions to the borders of the usable view, then scale them
-        x = androidx.core.math.MathUtils.clamp(x, mTextureView.getX(), mTextureView.getX() + mTextureView.getWidth());
-        y = androidx.core.math.MathUtils.clamp(y, mTextureView.getY(), mTextureView.getY() + mTextureView.getHeight());
+        x = androidx.core.math.MathUtils.clamp(x, 0, mTextureView.getWidth());
+        y = androidx.core.math.MathUtils.clamp(y, 0, mTextureView.getHeight());
 
-        Platform.cursorX = (int) MathUtils.map(x, mTextureView.getX(), mTextureView.getX() + mTextureView.getWidth(), 0, CallbackBridge.windowWidth);
-        Platform.cursorY = (int) MathUtils.map(y, mTextureView.getY(), mTextureView.getY() + mTextureView.getHeight(), 0, CallbackBridge.windowHeight);
+        Platform.cursorX = (int) MathUtils.map(x, 0, mTextureView.getWidth(), 0, CallbackBridge.windowWidth);
+        Platform.cursorY = (int) MathUtils.map(y, 0, mTextureView.getHeight(), 0, CallbackBridge.windowHeight);
         Platform.PLATFORM.sendMousePosition();
     }
 
