@@ -8,6 +8,7 @@
 #include <android/native_window_jni.h>
 #include <android/window.h>
 #include <android/log.h>
+#include <sys/time.h>
 #include <stdio.h>
 #include <pthread.h>
 #include "awt.h"
@@ -41,22 +42,33 @@ void setup_jni(JNIEnv *env) {
     assert(method_GetRGB != NULL);
 }
 
-static void* acquire_cacio_screenbuffer(JNIEnv *env, jint* arrayLength, jintArray* rgbArray) {
+static void* acquire_cacio_screenbuffer(JNIEnv *env, jintArray* rgbArray) {
     *rgbArray = (jintArray) (*env)->CallStaticObjectMethod(
             env,
             class_CTCScreen,
             method_GetRGB
     );
+    if((*env)->ExceptionCheck(env)) {
+        (*env)->ExceptionClear(env);
+        return NULL;
+    }
     if (*rgbArray == NULL) {
         return NULL;
     }
 
-    *arrayLength = (*env)->GetArrayLength(env, *rgbArray);
     return (*env)->GetPrimitiveArrayCritical(env, *rgbArray, NULL);
 }
 
 static void release_cacio_screenbuffer(JNIEnv *env, jintArray rgbArray, void* src_buf) {
     (*env)->ReleasePrimitiveArrayCritical(env, rgbArray, src_buf, 0);
+}
+
+static inline void add_nsec(long nsec, struct timespec *spec) {
+    spec->tv_nsec += nsec;
+    if(spec->tv_nsec >= 1000000000) {
+        spec->tv_nsec -= 1000000000;
+        spec->tv_sec += 1;
+    }
 }
 
 static void* render_loop_thread(void* param) {
@@ -79,12 +91,14 @@ static void* render_loop_thread(void* param) {
     setup_jni(env);
 
     jintArray array;
-    jint length;
     ANativeWindow_Buffer buffer;
+    struct timespec frame_now;
 
     while(is_rendering) {
-        void* buf = acquire_cacio_screenbuffer(env, &length, &array);
-        if(!length || !buf) continue;
+        clock_gettime(CLOCK_MONOTONIC, &frame_now);
+        add_nsec(4000000, &frame_now);
+        void* buf = acquire_cacio_screenbuffer(env, &array);
+        if(!buf) continue;
 
         int32_t res;
         if((res = ANativeWindow_lock(window, &buffer, NULL))) {
@@ -102,6 +116,7 @@ static void* render_loop_thread(void* param) {
         ANativeWindow_unlockAndPost(window);
         end:
         release_cacio_screenbuffer(env, array, src);
+        clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &frame_now, NULL);
     }
 
     (*runtimeVM)->DetachCurrentThread(runtimeVM);
