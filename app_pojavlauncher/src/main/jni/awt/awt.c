@@ -6,6 +6,8 @@
 #include <pthread.h>
 #include "awt.h"
 
+jclass class_AWTBridge;
+
 float inputXRatio = 0;
 float inputYRatio = 0;
 
@@ -26,6 +28,8 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved) {
         androidVM = vm;
         JNIEnv *env = NULL;
         (*vm)->GetEnv(vm, (void**)&env, JNI_VERSION_1_4);
+
+        class_AWTBridge = (*env)->NewGlobalRef(env, (*env)->FindClass(env, "net/kdt/pojavlaunch/awt/AWTBridge"));
 
         register_methods_util(env);
         register_methods_clipboard(env);

@@ -14,12 +14,12 @@
 #include "awt.h"
 #include "../anw.h"
 
-jclass class_Frame;
-jclass class_Rectangle;
-jmethodID constructor_Rectangle;
-jmethodID method_GetFrames;
-jmethodID method_GetBounds;
-jmethodID method_SetBounds;
+static jclass class_Frame;
+static jclass class_Rectangle;
+static jmethodID constructor_Rectangle;
+static jmethodID method_GetFrames;
+static jmethodID method_GetBounds;
+static jmethodID method_SetBounds;
 
 static jclass class_CTCScreen = NULL;
 static jmethodID method_GetRGB = NULL;
@@ -142,7 +142,7 @@ static void update_dims(jint width, jint height) {
 }
 
 JNIEXPORT void JNICALL
-Java_net_kdt_pojavlaunch_game_platform_backend_AWTBackend_nativeBeginRendering(JNIEnv *env,
+Java_net_kdt_pojavlaunch_awt_AWTBridge_nativeBeginRendering(JNIEnv *env,
                                                                                jclass clazz,
                                                                                jobject surface,
                                                                                jint bridge_width,
@@ -157,7 +157,7 @@ Java_net_kdt_pojavlaunch_game_platform_backend_AWTBackend_nativeBeginRendering(J
 }
 
 JNIEXPORT void JNICALL
-Java_net_kdt_pojavlaunch_game_platform_backend_AWTBackend_nativeMoveWindow(JNIEnv *env,
+Java_net_kdt_pojavlaunch_awt_AWTBridge_nativeMoveWindow(JNIEnv *env,
                                                                            jclass clazz, jint xoff,
                                                                            jint yoff) {
     if (JNIEnv_InputRuntime == NULL) {
@@ -192,15 +192,14 @@ Java_net_kdt_pojavlaunch_game_platform_backend_AWTBackend_nativeMoveWindow(JNIEn
 }
 
 JNIEXPORT void JNICALL
-Java_net_kdt_pojavlaunch_game_platform_backend_AWTBackend_nativeEndRendering(JNIEnv *env,
+Java_net_kdt_pojavlaunch_awt_AWTBridge_nativeEndRendering(JNIEnv *env,
                                                                              jclass clazz) {
     render_loop_shutdown();
 }
 
 JNIEXPORT void JNICALL
-Java_net_kdt_pojavlaunch_game_platform_backend_AWTBackend_nativeResize(JNIEnv *env, jclass clazz,
+Java_net_kdt_pojavlaunch_awt_AWTBridge_nativeResize(JNIEnv *env, jclass clazz,
                                                                        jint bridge_width,
                                                                        jint bridge_height) {
     update_dims(bridge_width, bridge_height);
 }
-

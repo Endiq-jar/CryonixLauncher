@@ -4,37 +4,38 @@
 
 #include "awt.h"
 
-jclass class_CallbackBridge;
 jmethodID method_OpenLink;
 jmethodID method_OpenPath;
+jmethodID method_NotifyAwtWindow;
 
 void register_methods_util(JNIEnv* env) {
-    class_CallbackBridge = (*env)->NewGlobalRef(env, (*env)->FindClass(env, "net/kdt/pojavlaunch/CallbackBridge"));
-    method_OpenLink= (*env)->GetStaticMethodID(env, class_CallbackBridge, "openLink", "(Ljava/lang/String;)V");
-    method_OpenPath= (*env)->GetStaticMethodID(env, class_CallbackBridge, "openLink", "(Ljava/lang/String;)V");
+    method_OpenLink = (*env)->GetStaticMethodID(env, class_AWTBridge, "openLink", "(Ljava/lang/String;)V");
+    method_OpenPath = (*env)->GetStaticMethodID(env, class_AWTBridge, "openLink", "(Ljava/lang/String;)V");
+    method_NotifyAwtWindow = (*env)->GetStaticMethodID(env, class_AWTBridge, "notifyWindowOpened", "()V");
 }
 
 JNIEXPORT void JNICALL Java_net_java_openjdk_cacio_ctc_CTCDesktopPeer_openFile(JNIEnv *env, jclass clazz, jstring filePath) {
-    JNIEnv *dalvikEnv;
-    char detachable = 0;
-    if((*androidVM)->GetEnv(androidVM, (void **) &dalvikEnv, JNI_VERSION_1_6) == JNI_EDETACHED) {
-        (*androidVM)->AttachCurrentThread(androidVM, &dalvikEnv, NULL);
-        detachable = 1;
-    }
+    DVMENV_ENTER()
     const char* stringChars = (*env)->GetStringUTFChars(env, filePath, NULL);
-    (*dalvikEnv)->CallStaticVoidMethod(dalvikEnv, class_CallbackBridge, method_OpenPath, (*dalvikEnv)->NewStringUTF(dalvikEnv, stringChars));
+    (*dalvikEnv)->CallStaticVoidMethod(dalvikEnv, class_AWTBridge, method_OpenPath, (*dalvikEnv)->NewStringUTF(dalvikEnv, stringChars));
     (*env)->ReleaseStringUTFChars(env, filePath, stringChars);
-    if(detachable) (*androidVM)->DetachCurrentThread(androidVM);
+    DVMENV_EXIT()
 }
 
 JNIEXPORT void JNICALL Java_net_java_openjdk_cacio_ctc_CTCDesktopPeer_openUri(JNIEnv *env, jclass clazz, jstring uri) {
-    JNIEnv *dalvikEnv;char detachable = 0;
-    if((*androidVM)->GetEnv(androidVM, (void **) &dalvikEnv, JNI_VERSION_1_6) == JNI_EDETACHED) {
-        (*androidVM)->AttachCurrentThread(androidVM, &dalvikEnv, NULL);
-        detachable = 1;
-    }
+    DVMENV_ENTER()
     const char* stringChars = (*env)->GetStringUTFChars(env, uri, NULL);
-    (*dalvikEnv)->CallStaticVoidMethod(dalvikEnv, class_CallbackBridge, method_OpenLink, (*dalvikEnv)->NewStringUTF(dalvikEnv, stringChars));
+    (*dalvikEnv)->CallStaticVoidMethod(dalvikEnv, class_AWTBridge, method_OpenLink, (*dalvikEnv)->NewStringUTF(dalvikEnv, stringChars));
     (*env)->ReleaseStringUTFChars(env, uri, stringChars);
-    if(detachable) (*androidVM)->DetachCurrentThread(androidVM);
+    DVMENV_EXIT()
+}
+
+JNIEXPORT void JNICALL Java_net_java_openjdk_cacio_ctc_NotifierWindowFactory_onToplevelWindowCreated(JNIEnv *env, jclass clazz) {
+    DVMENV_ENTER()
+    (*dalvikEnv)->CallStaticVoidMethod(dalvikEnv, class_AWTBridge, method_NotifyAwtWindow);
+    DVMENV_EXIT()
+}
+
+JNIEXPORT void JNICALL Java_com_github_caciocavallosilano_cacio_ctc_NotifierWindowFactory_onToplevelWindowCreated(JNIEnv *env, jclass clazz) {
+    Java_net_java_openjdk_cacio_ctc_NotifierWindowFactory_onToplevelWindowCreated(env, clazz);
 }

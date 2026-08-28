@@ -26,7 +26,6 @@ import net.kdt.pojavlaunch.SingleTapConfirm;
 import net.kdt.pojavlaunch.Tools;
 import net.kdt.pojavlaunch.customcontrols.keyboard.TouchCharInput;
 import net.kdt.pojavlaunch.game.platform.Platform;
-import net.kdt.pojavlaunch.game.platform.backend.AWTBackend;
 import net.kdt.pojavlaunch.multirt.MultiRTUtils;
 import net.kdt.pojavlaunch.multirt.Runtime;
 import net.kdt.pojavlaunch.prefs.LauncherPreferences;
@@ -315,16 +314,16 @@ public class AWTActivity extends BaseActivity implements View.OnTouchListener {
         }
         if(isDown) switch(v.getId()) {
             case R.id.installmod_window_moveup:
-                AWTBackend.nativeMoveWindow(0, -10);
+                AWTBridge.nativeMoveWindow(0, -10);
                 break;
             case R.id.installmod_window_movedown:
-                AWTBackend.nativeMoveWindow(0, 10);
+                AWTBridge.nativeMoveWindow(0, 10);
                 break;
             case R.id.installmod_window_moveleft:
-                AWTBackend.nativeMoveWindow(-10, 0);
+                AWTBridge.nativeMoveWindow(-10, 0);
                 break;
             case R.id.installmod_window_moveright:
-                AWTBackend.nativeMoveWindow(10, 0);
+                AWTBridge.nativeMoveWindow(10, 0);
                 break;
         }
         return true;
