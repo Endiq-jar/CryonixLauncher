@@ -1,16 +1,21 @@
 package net.kdt.pojavlaunch.modloaders.modpacks.api;
 
+import android.widget.Toast;
+
 import com.kdt.mcgui.ProgressLayout;
 
 import git.artdeell.mojo.R;
+
 import net.kdt.pojavlaunch.Tools;
 import net.kdt.pojavlaunch.instances.InstanceInstaller;
 import net.kdt.pojavlaunch.instances.Instances;
 import net.kdt.pojavlaunch.instances.Instance;
+import net.kdt.pojavlaunch.lifecycle.ContextExecutor;
 import net.kdt.pojavlaunch.modloaders.modpacks.imagecache.ModIconCache;
 import net.kdt.pojavlaunch.modloaders.modpacks.models.ModDetail;
 import net.kdt.pojavlaunch.progresskeeper.DownloaderProgressWrapper;
 import net.kdt.pojavlaunch.utils.DownloadUtils;
+import net.kdt.pojavlaunch.utils.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,6 +50,7 @@ public class ModpackInstaller {
             if(modLoaderInfo.requiresGuiInstallation()) {
                 instance.installer.start();
             }
+            else ContextExecutor.executeActivity(activity -> Toast.makeText(activity, R.string.modpack_install_toast_success, Toast.LENGTH_SHORT).show());
         } catch (IOException e) {
             Instances.removeInstance(instance);
             throw e;
@@ -59,8 +65,7 @@ public class ModpackInstaller {
     public static ModLoader downloadModpack(ModDetail modDetail, int selectedVersion, InstallFunction installFunction) throws IOException {
         String versionUrl = modDetail.versionUrls[selectedVersion];
         String versionHash = modDetail.versionHashes[selectedVersion];
-        String modpackName = (modDetail.title.toLowerCase(Locale.ROOT) + " " + modDetail.versionNames[selectedVersion])
-                .trim().replaceAll("[\\\\/:*?\"<>| \\t\\n]", "_" );
+        String modpackName = FileUtils.escapeFileName(modDetail.title.toLowerCase(Locale.ROOT) + " " + modDetail.versionNames[selectedVersion]);
         String name = modDetail.title;
         String icon = modDetail.getIconCacheTag();
 
