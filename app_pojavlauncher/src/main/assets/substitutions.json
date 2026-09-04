@@ -2282,6 +2282,9 @@
     "org.lwjgl:lwjgl-tinyfd:3.3.1:natives-linux": {
       "skip": true
     },
+    "net.java.jinput:jinput-platform:2.0.5": {
+      "skip": true
+    },
     "org.lwjgl:lwjgl-openal:3.3.2:natives-linux": {
       "skip": true
     },
