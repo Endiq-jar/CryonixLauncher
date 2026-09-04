@@ -192,6 +192,49 @@
         }
       }
     },
+    "org.lwjgl:lwjgl-spng:3.4.3": {
+      "name": "org.lwjgl:lwjgl-spng:3.4.3",
+      "natives": {
+        "android-arm": "natives-linux-arm32",
+        "android-x86": "natives-linux-x86",
+        "android-x86_64": "natives-linux",
+        "android-arm64": "natives-linux-arm64"
+      },
+      "downloads": {
+        "artifact": {
+          "path": "org/lwjgl/lwjgl-spng/3.4.3/lwjgl-spng-3.4.3.jar",
+          "sha1": "fbff8af075ebe082fffe79fd4eaaa52197fcbb48",
+          "size": 116943,
+          "url": "https://github.com/MojoLauncher/unilwjgl3-builder/releases/download/v3.4.3-r6/lwjgl-spng-3.4.3.jar"
+        },
+        "classifiers": {
+          "natives-linux-arm32": {
+            "path": "org/lwjgl/lwjgl-spng/3.4.3/lwjgl-spng-natives-linux-arm32-3.4.3.jar",
+            "sha1": "44653716a2ff014fe03c59611eb1d6c34169a7eb",
+            "size": 52799,
+            "url": "https://github.com/MojoLauncher/unilwjgl3-builder/releases/download/v3.4.3-r6/lwjgl-spng-natives-linux-arm32-3.4.3.jar"
+          },
+          "natives-linux-arm64": {
+            "path": "org/lwjgl/lwjgl-spng/3.4.3/lwjgl-spng-natives-linux-arm64-3.4.3.jar",
+            "sha1": "255c77102ac02ad97763b5000579d091740cb19e",
+            "size": 60147,
+            "url": "https://github.com/MojoLauncher/unilwjgl3-builder/releases/download/v3.4.3-r6/lwjgl-spng-natives-linux-arm64-3.4.3.jar"
+          },
+          "natives-linux-x86": {
+            "path": "org/lwjgl/lwjgl-spng/3.4.3/lwjgl-spng-natives-linux-x86-3.4.3.jar",
+            "sha1": "bd0d1a2f1d2211d9fb84c6d1cc950b2c8c961419",
+            "size": 68798,
+            "url": "https://github.com/MojoLauncher/unilwjgl3-builder/releases/download/v3.4.3-r6/lwjgl-spng-natives-linux-x86-3.4.3.jar"
+          },
+          "natives-linux": {
+            "path": "org/lwjgl/lwjgl-spng/3.4.3/lwjgl-spng-natives-linux-3.4.3.jar",
+            "sha1": "94c70517b0e65d46a428eec8e8f4efef6521adab",
+            "size": 60917,
+            "url": "https://github.com/MojoLauncher/unilwjgl3-builder/releases/download/v3.4.3-r6/lwjgl-spng-natives-linux-3.4.3.jar"
+          }
+        }
+      }
+    },
     "org.lwjgl:lwjgl-freetype:3.4.1": {
       "name": "org.lwjgl:lwjgl-freetype:3.4.1",
       "downloads": {
@@ -442,6 +485,9 @@
       "skip": true
     },
     "org.lwjgl:lwjgl-tinyfd:3.4.1:natives-linux": {
+      "skip": true
+    },
+    "org.lwjgl:lwjgl-spng:3.4.3:natives-linux": {
       "skip": true
     },
     "org.lwjgl:lwjgl-sdl:3.4.3": {
