@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="@dimen/_150sdp"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="@dimen/_10sdp"
+    android:background="@drawable/background_card"
+    android:padding="@dimen/_8sdp">
+
+    <ImageView
+        android:id="@+id/instance_card_icon"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/_60sdp"
+        android:background="@color/background_app"
+        android:padding="@dimen/_10sdp"
+        android:scaleType="fitCenter"
+        android:contentDescription="@null"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/instance_card_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/_6sdp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:textSize="@dimen/_12ssp"
+        android:textStyle="bold"
+        android:textColor="@android:color/white"
+        app:layout_constraintTop_toBottomOf="@id/instance_card_icon"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/instance_card_version"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:ellipsize="end"
+        android:textSize="@dimen/_10ssp"
+        android:textColor="@color/secondary_text"
+        app:layout_constraintTop_toBottomOf="@id/instance_card_name"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <Button
+        android:id="@+id/instance_card_manage_button"
+        style="?android:attr/borderlessButtonStyle"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/_28sdp"
+        android:layout_marginTop="@dimen/_6sdp"
+        android:background="@drawable/background_card"
+        android:text="@string/instance_card_manage"
+        android:textAllCaps="false"
+        android:textSize="@dimen/_10ssp"
+        android:textColor="@android:color/white"
+        app:layout_constraintTop_toBottomOf="@id/instance_card_version"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/instance_card_play_button" />
+
+    <com.kdt.mcgui.MineButton
+        android:id="@+id/instance_card_play_button"
+        android:layout_width="0dp"
+        android:layout_height="@dimen/_28sdp"
+        android:layout_marginTop="@dimen/_6sdp"
+        android:layout_marginStart="@dimen/_6sdp"
+        android:text="@string/main_play"
+        android:textAllCaps="false"
+        android:textSize="@dimen/_10ssp"
+        app:layout_constraintTop_toBottomOf="@id/instance_card_version"
+        app:layout_constraintStart_toEndOf="@id/instance_card_manage_button"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

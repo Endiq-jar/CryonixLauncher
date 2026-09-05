@@ -54,7 +54,7 @@
 	</ScrollView>
 
 	<!-- Account switching used to live in the top bar; it now sits here,
-	     bottom-left, above the version selector. -->
+	     bottom-left, above the installed-instance cards. -->
 	<com.kdt.mcgui.AccountSpinner
 		android:id="@+id/account_spinner"
 		android:layout_width="@dimen/_150sdp"
@@ -64,60 +64,22 @@
 		android:dropDownWidth="@dimen/_250sdp"
 		android:dropDownVerticalOffset="@dimen/_36sdp"
 
-		app:layout_constraintBottom_toTopOf="@id/mc_version_spinner"
+		app:layout_constraintBottom_toTopOf="@id/instance_card_recycler"
 		app:layout_constraintStart_toStartOf="parent" />
 
-	<com.kdt.mcgui.mcVersionSpinner
-		android:id="@+id/mc_version_spinner"
-		android:layout_width="0dp"
-		android:layout_height="@dimen/_52sdp"
-		android:background="@android:color/transparent"
-		android:drawableEnd="@drawable/spinner_arrow"
-
-		app:drawableEndSize="@dimen/padding_heavy"
-		app:drawableStartIntegerScaling="true"
-		app:drawableStartSize="@dimen/_36sdp"
-		app:drawableEndPadding="@dimen/_1sdp"
-
-		app:layout_constraintBottom_toTopOf="@id/play_button"
-		app:layout_constraintEnd_toStartOf="@+id/edit_profile_button"
-		app:layout_constraintStart_toStartOf="parent" />
-
-	<ImageButton
-		android:id="@+id/edit_profile_button"
-		android:layout_width="@dimen/_52sdp"
-		android:layout_height="@dimen/_52sdp"
-		android:background="?android:attr/selectableItemBackground"
-
-		android:src="@drawable/ic_px_edit"
-		app:layout_constraintBottom_toBottomOf="@+id/mc_version_spinner"
-		app:layout_constraintEnd_toEndOf="parent"
-		app:layout_constraintTop_toTopOf="@+id/mc_version_spinner" />
-
-
-	<!-- This view is for cosmetic purpose only -->
-	<View
-		android:id="@+id/_background_display_view"
+	<!-- Every installed instance shows up as its own card here, each with its
+	     own Play/Manage buttons - replaces the single mc_version_spinner row. -->
+	<androidx.recyclerview.widget.RecyclerView
+		android:id="@+id/instance_card_recycler"
 		android:layout_width="match_parent"
-		android:layout_height="0dp"
+		android:layout_height="@dimen/_140sdp"
 		android:background="@color/background_bottom_bar"
-		android:translationZ="-1dp"
-
-		app:layout_constraintBottom_toBottomOf="parent"
-		app:layout_constraintTop_toTopOf="@id/mc_version_spinner" />
-
-	<com.kdt.mcgui.MineButton
-		android:id="@+id/play_button"
-		android:layout_width="match_parent"
-		android:layout_height="@dimen/_62sdp"
-
-		android:layout_marginHorizontal="@dimen/_17sdp"
-		android:layout_marginBottom="@dimen/_15sdp"
-
-		android:textAllCaps="true"
-		android:text="@string/main_play"
-		app:layout_constraintBottom_toBottomOf="parent"
-		/>
+		android:clipToPadding="false"
+		android:orientation="horizontal"
+		android:paddingHorizontal="@dimen/_10sdp"
+		android:paddingVertical="@dimen/_10sdp"
+		app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+		app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 
