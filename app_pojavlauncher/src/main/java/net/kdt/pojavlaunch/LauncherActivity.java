@@ -1,6 +1,9 @@
 package net.kdt.pojavlaunch;
 
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static net.kdt.pojavlaunch.Tools.openPath;
+import static net.kdt.pojavlaunch.Tools.shareLog;
+
 import android.Manifest;
 import android.app.NotificationManager;
 import android.content.Context;
@@ -27,6 +30,7 @@ import androidx.fragment.app.FragmentManager;
 import com.kdt.mcgui.ProgressLayout;
 
 import net.kdt.pojavlaunch.authenticator.accounts.Accounts;
+import net.kdt.pojavlaunch.contracts.OpenDocumentWithExtension;
 import net.kdt.pojavlaunch.extra.ExtraConstants;
 import net.kdt.pojavlaunch.extra.ExtraCore;
 import net.kdt.pojavlaunch.extra.ExtraListener;
@@ -47,7 +51,10 @@ import net.kdt.pojavlaunch.services.ProgressServiceKeeper;
 import net.kdt.pojavlaunch.tasks.MoJsonExtras;
 import net.kdt.pojavlaunch.tasks.AsyncVersionList;
 import net.kdt.pojavlaunch.tasks.MoJsonDownloader;
+import net.kdt.pojavlaunch.utils.FileUtils;
 import net.kdt.pojavlaunch.utils.NotificationUtils;
+
+import java.io.File;
 
 import git.artdeell.mojo.R;
 
@@ -56,17 +63,36 @@ public class LauncherActivity extends BaseActivity {
 
     private FragmentContainerView mFragmentView;
     private ImageButton mSettingsButton;
+    /* Right side bar buttons - only meaningful while looking at the main menu */
+    private ImageButton mSidebarCustomControlButton;
+    private ImageButton mSidebarInstallJarButton;
+    private ImageButton mSidebarShareLogsButton;
+    private ImageButton mSidebarOpenDirectoryButton;
     private ProgressLayout mProgressLayout;
     private ProgressServiceKeeper mProgressServiceKeeper;
     private NotificationManager mNotificationManager;
     private static ActivityResultLauncher<String> mRequestPermissionLauncher;
 
-    /* Allows to switch from one button "type" to another */
+    private final ActivityResultLauncher<Object> mModInstallerLauncher =
+            registerForActivityResult(new OpenDocumentWithExtension("jar"), (data)->{
+                if(data != null) Tools.launchModInstaller(this, data);
+            });
+
+    /* Allows to switch from one button "type" to another, and only show the
+       main-menu-only sidebar actions (custom controls/jar/logs/directory)
+       while the main menu itself is visible */
     private final FragmentManager.FragmentLifecycleCallbacks mFragmentCallbackListener = new FragmentManager.FragmentLifecycleCallbacks() {
         @Override
         public void onFragmentResumed(@NonNull FragmentManager fm, @NonNull Fragment f) {
-            mSettingsButton.setImageDrawable(ContextCompat.getDrawable(getBaseContext(), f instanceof MainMenuFragment
+            boolean isMainMenu = f instanceof MainMenuFragment;
+            mSettingsButton.setImageDrawable(ContextCompat.getDrawable(getBaseContext(), isMainMenu
                     ? R.drawable.ic_px_sliders : R.drawable.ic_px_home));
+
+            int visibility = isMainMenu ? View.VISIBLE : View.GONE;
+            mSidebarCustomControlButton.setVisibility(visibility);
+            mSidebarInstallJarButton.setVisibility(visibility);
+            mSidebarShareLogsButton.setVisibility(visibility);
+            mSidebarOpenDirectoryButton.setVisibility(visibility);
         }
     };
 
@@ -192,6 +218,10 @@ public class LauncherActivity extends BaseActivity {
         ProgressKeeper.addTaskCountListener((mProgressServiceKeeper = new ProgressServiceKeeper(this)));
 
         mSettingsButton.setOnClickListener(mSettingButtonListener);
+        mSidebarCustomControlButton.setOnClickListener(v -> startActivity(new Intent(this, CustomControlsActivity.class)));
+        mSidebarInstallJarButton.setOnClickListener(v -> runInstallerWithConfirmation());
+        mSidebarShareLogsButton.setOnClickListener(v -> shareLog(this));
+        mSidebarOpenDirectoryButton.setOnClickListener(v -> openGameDirectory(this));
         ProgressKeeper.addTaskCountListener(mProgressLayout);
         ExtraCore.addExtraListener(ExtraConstants.BACK_PREFERENCE, mBackPreferenceListener);
         ExtraCore.addExtraListener(ExtraConstants.SELECT_AUTH_METHOD, mSelectAuthMethod);
@@ -327,10 +357,34 @@ public class LauncherActivity extends BaseActivity {
                 .apply();
     }
 
+    private void runInstallerWithConfirmation() {
+        if (ProgressKeeper.getTaskCount() == 0) {
+            mModInstallerLauncher.launch(null);
+        } else Toast.makeText(this, R.string.tasks_ongoing, Toast.LENGTH_LONG).show();
+    }
+
+    private void openGameDirectory(Context context) {
+        Instance instance = Instances.loadSelectedInstance();
+        if(instance == null) {
+            Toast.makeText(context, R.string.no_instance, Toast.LENGTH_LONG).show();
+            return;
+        }
+        File gameDirectory = instance.getGameDirectory();
+        if(FileUtils.ensureDirectorySilently(gameDirectory)) {
+            openPath(context, gameDirectory, false);
+        }else {
+            Toast.makeText(context, R.string.gamedir_open_failed, Toast.LENGTH_LONG).show();
+        }
+    }
+
     /** Stuff all the view boilerplate here */
     private void bindViews(){
         mFragmentView = findViewById(R.id.container_fragment);
         mSettingsButton = findViewById(R.id.setting_button);
+        mSidebarCustomControlButton = findViewById(R.id.sidebar_custom_control_button);
+        mSidebarInstallJarButton = findViewById(R.id.sidebar_install_jar_button);
+        mSidebarShareLogsButton = findViewById(R.id.sidebar_share_logs_button);
+        mSidebarOpenDirectoryButton = findViewById(R.id.sidebar_open_directory_button);
         mProgressLayout = findViewById(R.id.progress_layout);
     }
 }

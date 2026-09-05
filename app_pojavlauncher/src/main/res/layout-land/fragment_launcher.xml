@@ -55,44 +55,23 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/social_divider"/>
 
-            <com.kdt.mcgui.LauncherMenuButton
-                android:id="@+id/custom_control_button"
-                style="@style/LauncherMenuButton.Universal"
-                android:layout_width="match_parent"
-                android:drawableStart="@drawable/ic_px_gamepad"
-                android:text="@string/mcl_option_customcontrol"
-                app:layout_constraintTop_toBottomOf="@id/news_button"/>
-
-            <com.kdt.mcgui.LauncherMenuButton
-                android:id="@+id/install_jar_button"
-                style="@style/LauncherMenuButton.Universal"
-                android:layout_width="match_parent"
-                android:drawableStart="@drawable/ic_px_java_run"
-                android:text="@string/main_install_jar_file"
-                app:layout_constraintTop_toBottomOf="@id/custom_control_button"
-                tools:layout_editor_absoluteX="0dp" />
-
-            <com.kdt.mcgui.LauncherMenuButton
-                android:id="@+id/share_logs_button"
-                style="@style/LauncherMenuButton.Universal"
-                android:layout_width="match_parent"
-                android:drawableStart="@drawable/ic_px_sharelog"
-                android:text="@string/main_share_logs"
-                app:layout_constraintTop_toBottomOf="@id/install_jar_button" />
-
-            <com.kdt.mcgui.LauncherMenuButton
-                android:id="@+id/open_files_button"
-                style="@style/LauncherMenuButton.Universal"
-                android:layout_width="match_parent"
-                android:drawableStart="@drawable/ic_px_folder"
-                android:text="@string/mcl_button_open_directory"
-
-                app:layout_constraintTop_toBottomOf="@id/share_logs_button" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 
+    <!-- Account switching used to live in the top bar; it now sits here,
+         bottom-left, above the version selector. -->
+    <com.kdt.mcgui.AccountSpinner
+        android:id="@+id/account_spinner"
+        android:layout_width="@dimen/_120sdp"
+        android:layout_height="@dimen/_28sdp"
+        android:layout_marginStart="8dp"
+        android:layout_marginBottom="4dp"
 
+        android:dropDownWidth="@dimen/_250sdp"
+        android:dropDownVerticalOffset="@dimen/_28sdp"
 
+        app:layout_constraintBottom_toTopOf="@id/mc_version_spinner"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <com.kdt.mcgui.mcVersionSpinner
         android:id="@+id/mc_version_spinner"
